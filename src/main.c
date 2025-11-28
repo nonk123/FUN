@@ -4,6 +4,7 @@
 
 #include "camera.h"
 #include "log.h"
+#include "shader.h"
 
 int exitcode = EXIT_SUCCESS; // also used in `log.c`
 
@@ -12,6 +13,8 @@ static void realmain() {
 
 	InitWindow(800, 600, "FUN.");
 	InitAudioDevice();
+
+	shader_init();
 
 	SetTargetFPS(60);
 	SetExitKey(KEY_BACKSPACE);
@@ -24,18 +27,20 @@ static void realmain() {
 			ClearBackground(RAYWHITE);
 
 			BeginMode3D(camera);
-			{
-				DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);
-			}
+			shader_begin();
+
+			DrawCube(ORIGIN, 1.f, 1.f, 1.f, WHITE);
+
+			shader_end();
 			EndMode3D();
 
 			DrawFPS(5, 5);
 		}
 		EndDrawing();
 	}
-}
 
-static void cleanup() {
+	shader_teardown();
+
 	CloseAudioDevice();
 	CloseWindow();
 }
@@ -43,6 +48,5 @@ static void cleanup() {
 int main(int argc, char* argv[]) {
 	log_init();
 	realmain();
-	cleanup();
 	return exitcode;
 }
