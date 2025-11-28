@@ -8,7 +8,7 @@ void set_lock_cursor(bool lock) {
 		EnableCursor();
 }
 
-Camera3D camera = {0};
+Camera3D camera = {0}; // `extern` in `main.c`
 
 void look_at(Vector3 from, Vector3 to) {
 	camera.projection = CAMERA_PERSPECTIVE;
