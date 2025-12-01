@@ -1,11 +1,9 @@
 #include <stdlib.h>
-#include <string.h>
 
 #include <open-simplex-noise.h>
 #include <raylib.h>
 #include <raymath.h>
 
-#include "log.h"
 #include "terrain.h"
 #include "vecmath.h"
 
