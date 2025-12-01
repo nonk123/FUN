@@ -21,7 +21,7 @@ static void realmain() {
 	sh_init();
 
 	while (!WindowShouldClose()) {
-		look_at(XYZ(3, 3, -5), ORIGIN);
+		look_dir(XYZ(10, 10, -10), XYZ(-1, -1, 1));
 		t_update();
 
 		BeginDrawing();
@@ -29,7 +29,6 @@ static void realmain() {
 			ClearBackground(BLACK);
 
 			BeginMode3D(camera);
-			sh_begin();
 
 			light_reset();
 
@@ -38,6 +37,8 @@ static void realmain() {
 			light_place();
 
 			light_done();
+
+			sh_begin();
 
 			t_draw();
 			DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);

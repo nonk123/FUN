@@ -65,7 +65,8 @@ void main() {
 	}
 	light_color = min(light_color, vec4(1.0));
 
-	gl_FragColor = light_color * surface_color;
+	vec4 final_color = light_color * surface_color;
+	gl_FragColor = vec4(mix(final_color.rgb, vec3(0.0), final_color.a), 1.0);
 }
 )";
 
@@ -79,7 +80,7 @@ void sh_init() {
 	shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "m_model");
 
 	const int zero = 0;
-	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
+	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.6f), SHADER_UNIFORM_VEC4);
 	sh_set(SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);
 }
 
