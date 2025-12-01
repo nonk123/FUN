@@ -90,8 +90,8 @@ static void update_mesh(Chunk* c) {
 
 #define Ht(_x, _z) XYZ(chunk_center(c).x, c_height(c, (_x), (_z)), chunk_center(c).y)
 #define Nm(_x, _z)                                                                                                     \
-	Vector3Normalize(XYZ(0.5f * (c_height(c, (_x) + 1, (_z)) - c_height(c, (_x) - 1, (_z))), -1.f,                 \
-		0.5f * (c_height(c, (_x), (_z) + 1) - c_height(c, (_x), (_z) - 1))))
+	Vector3Normalize(XYZ(c_height(c, (_x) + 1, (_z)) - c_height(c, (_x) - 1, (_z)), 2.f,                           \
+		c_height(c, (_x), (_z) + 1) - c_height(c, (_x), (_z) - 1)))
 #define Tx(_x, _y) XY((float)(_x) / RESOLUTION, (float)(_y) / RESOLUTION)
 
 #define Full(d, _x, _z)                                                                                                \
