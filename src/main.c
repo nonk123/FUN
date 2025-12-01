@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "log.h"
 #include "shader.h"
+#include "terrain.h"
 
 int exitcode = EXIT_SUCCESS; // also used in `log.c`
 
@@ -19,9 +20,10 @@ static void realmain() {
 	SetTargetFPS(60);
 	SetExitKey(KEY_BACKSPACE);
 
-	look_at(XYZ(3, 3, -5), ORIGIN);
-
 	while (!WindowShouldClose()) {
+		look_at(XYZ(3, 3, -5), ORIGIN);
+		t_update();
+
 		BeginDrawing();
 		{
 			ClearBackground(RAYWHITE);
@@ -29,6 +31,7 @@ static void realmain() {
 			BeginMode3D(camera);
 			sh_begin();
 
+			t_draw();
 			DrawCube(ORIGIN, 1.f, 1.f, 1.f, WHITE);
 
 			sh_end();
@@ -46,7 +49,8 @@ static void realmain() {
 }
 
 int main(int argc, char* argv[]) {
-	log_init();
+	log_init(), t_init();
 	realmain();
+	t_teardown();
 	return exitcode;
 }

@@ -26,11 +26,9 @@ IncludeBlocks: Regroup
 IncludeIsMainRegex: "a{999}" # no main includes
 SortIncludes: CaseSensitive
 IncludeCategories:
-  - Regex: "^<ray"
+  - Regex: "^<(ray|open-simplex-noise)"
     Priority: 5
     SortPriority: 10
-  - Regex: "^<S_"
-    Priority: 20
   - Regex: "^<"
     Priority: 0
   - Regex: '^".+/'

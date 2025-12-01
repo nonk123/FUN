@@ -11,17 +11,27 @@ set(BUILD_SHARED_LIBS OFF)
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
-FetchContent_Declare(
-    raylib
+FetchContent_Declare(raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
     GIT_TAG 5.5)
-FetchContent_MakeAvailable(raylib)
+
+FetchContent_Declare(noise
+    GIT_REPOSITORY https://github.com/smcameron/open-simplex-noise-in-c.git
+    GIT_TAG 53cf5bfd4a5289f263568bedd778e2d86eb8a1ef)
+
+FetchContent_MakeAvailable(raylib noise)
+
+add_library(noise
+    ${noise_SOURCE_DIR}/open-simplex-noise.c
+    ${noise_SOURCE_DIR}/open-simplex-noise.h)
+target_include_directories(noise PUBLIC ${noise_SOURCE_DIR})
+target_compile_definitions(noise PUBLIC OSNFLOAT=float)
 
 file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.c)
 file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/include/*.h)
 
 add_executable(fun ${SOURCES} ${HEADERS})
-target_link_libraries(fun PRIVATE raylib)
+target_link_libraries(fun PRIVATE raylib noise)
 target_include_directories(fun
     PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_definitions(fun

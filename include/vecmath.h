@@ -4,6 +4,7 @@
 #include <raymath.h>
 
 #define XYZ(_x, _y, _z) ((Vector3){.x = (float)(_x), .y = (float)(_y), .z = (float)(_z)})
+#define XY(_x, _y) ((Vector2){.x = (float)(_x), .y = (float)(_y)})
 
 #define ORIGIN XYZ(0, 0, 0)
 
