@@ -13,13 +13,12 @@ int exitcode = EXIT_SUCCESS; // also used in `log.c`
 static void realmain() {
 	extern Camera3D camera;
 
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
 	InitWindow(800, 600, "FUN.");
 	InitAudioDevice();
 
-	sh_init();
-
-	SetTargetFPS(60);
 	SetExitKey(KEY_BACKSPACE);
+	sh_init();
 
 	while (!WindowShouldClose()) {
 		look_at(XYZ(3, 3, -5), ORIGIN);
