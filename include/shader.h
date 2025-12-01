@@ -8,6 +8,6 @@ typedef enum {
 	SHV_DIFFUSE,
 } ShaderValue;
 
-void shader_init(), shader_teardown();
-void shader_begin(), shader_end();
-void shader_set(ShaderValue idx, const void* value, int type);
+void sh_init(), sh_teardown();
+void sh_begin(), sh_end();
+void sh_set(ShaderValue idx, const void* value, int type);

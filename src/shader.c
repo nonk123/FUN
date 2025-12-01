@@ -46,26 +46,26 @@ void main() {
 
 static Shader shader = {0};
 
-void shader_init() {
+void sh_init() {
 	shader = LoadShaderFromMemory(vsh, fsh);
 	// shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
 	shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader, "mvp");
-	shader_set(SHV_DIFFUSE, RGB(1.f, 0.f, 0.f), SHADER_UNIFORM_VEC4);
+	sh_set(SHV_DIFFUSE, RGB(1.f, 0.f, 0.f), SHADER_UNIFORM_VEC4);
 }
 
-void shader_set(ShaderValue idx, const void* value, int type) {
+void sh_set(ShaderValue idx, const void* value, int type) {
 	idx = GetShaderLocation(shader, VARS[idx]);
 	SetShaderValue(shader, idx, value, type);
 }
 
-void shader_teardown() {
+void sh_teardown() {
 	UnloadShader(shader);
 }
 
-void shader_begin() {
+void sh_begin() {
 	BeginShaderMode(shader);
 }
 
-void shader_end() {
+void sh_end() {
 	EndShaderMode();
 }

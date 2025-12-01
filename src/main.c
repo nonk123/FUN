@@ -14,7 +14,7 @@ static void realmain() {
 	InitWindow(800, 600, "FUN.");
 	InitAudioDevice();
 
-	shader_init();
+	sh_init();
 
 	SetTargetFPS(60);
 	SetExitKey(KEY_BACKSPACE);
@@ -27,11 +27,11 @@ static void realmain() {
 			ClearBackground(RAYWHITE);
 
 			BeginMode3D(camera);
-			shader_begin();
+			sh_begin();
 
 			DrawCube(ORIGIN, 1.f, 1.f, 1.f, WHITE);
 
-			shader_end();
+			sh_end();
 			EndMode3D();
 
 			DrawFPS(5, 5);
@@ -39,7 +39,7 @@ static void realmain() {
 		EndDrawing();
 	}
 
-	shader_teardown();
+	sh_teardown();
 
 	CloseAudioDevice();
 	CloseWindow();
