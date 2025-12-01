@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 #include "camera.h"
+#include "light.h"
 #include "log.h"
 #include "shader.h"
 #include "terrain.h"
@@ -26,12 +27,18 @@ static void realmain() {
 
 		BeginDrawing();
 		{
-			ClearBackground(RAYWHITE);
+			ClearBackground(BLACK);
 
 			BeginMode3D(camera);
 			sh_begin();
 
-			sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
+			light_reset();
+
+			light_pos(1.f, 2.f, -3.f);
+			light_color(1.f, 1.f, 1.f, 0.5f);
+			light_place();
+
+			light_done();
 
 			t_draw();
 			DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);

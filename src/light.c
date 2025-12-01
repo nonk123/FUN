@@ -1,0 +1,55 @@
+#include <stdint.h>
+#include <string.h>
+
+#include "light.h"
+#include "shader.h"
+#include "vecmath.h"
+
+static Light lights[128] = {0};
+static int light_count = 0;
+
+static void check_light_count() {
+	if (light_count >= MAX_LIGHTS)
+		light_count = MAX_LIGHTS;
+}
+
+void light_reset() {
+	memset(lights, 0, sizeof(lights));
+	light_count = 0;
+}
+
+static void light_set(int idx, const char* field, const void* value, int type) {
+	sh_set_raw(TextFormat("lights[%d].%s", idx, field), value, type, 1);
+}
+
+void light_done() {
+	check_light_count();
+	sh_set(SHV_LIGHT_COUNT, &light_count, SHADER_UNIFORM_INT);
+
+	for (int i = 0; i < MAX_LIGHTS; i++) {
+		light_set(i, "pos", &lights[i].position, SHADER_UNIFORM_VEC3);
+		light_set(i, "color", &lights[i].color, SHADER_UNIFORM_VEC4);
+	}
+}
+
+void light_pos(float x, float y, float z) {
+	light_pos_v(XYZ(x, y, z));
+}
+
+void light_pos_v(Vector3 position) {
+	lights[light_count].position = position;
+}
+
+void light_color(float r, float g, float b, float a) {
+	lights[light_count].color = (Vector4){.x = r, .y = g, .z = b, .w = a};
+}
+
+void light_color_v(Color color) {
+	const float r = (float)color.r / 255.f, g = (float)color.g / 255.f, b = (float)color.b / 255.f,
+		    a = (float)color.a / 255.f;
+	light_color(r, g, b, a);
+}
+
+void light_place() {
+	light_count++, check_light_count();
+}
