@@ -45,11 +45,9 @@ void light_color(float r, float g, float b, float a) {
 }
 
 void light_color_v(Color color) {
-	const float r = (float)color.r / 255.f, g = (float)color.g / 255.f, b = (float)color.b / 255.f,
-		    a = (float)color.a / 255.f;
-	light_color(r, g, b, a);
+	light_color((float)color.r / 255.f, (float)color.g / 255.f, (float)color.b / 255.f, (float)color.a / 255.f);
 }
 
-void light_place() {
+void place_light() {
 	light_count++, check_light_count();
 }

@@ -13,4 +13,4 @@ void light_reset(), light_done();
 
 void light_pos(float, float, float), light_pos_v(Vector3);
 void light_color(float, float, float, float), light_color_v(Color);
-void light_place();
+void place_light();

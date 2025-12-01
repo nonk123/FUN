@@ -20,34 +20,34 @@ static void realmain() {
 	SetExitKey(KEY_BACKSPACE);
 	sh_init();
 
+	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
+
 	while (!WindowShouldClose()) {
-		look_dir(XYZ(10, 10, -10), XYZ(-1, -1, 1));
+		look_dir(XYZ(10, 10, 10), XYZ(-1, -1, -1));
 		t_update();
 
 		BeginDrawing();
+		ClearBackground(BLACK);
+		BeginMode3D(camera);
 		{
-			ClearBackground(BLACK);
-
-			BeginMode3D(camera);
-
 			light_reset();
-
-			light_pos(1.f, 2.f, -3.f);
-			light_color(1.f, 1.f, 1.f, 0.5f);
-			light_place();
-
+			{
+				light_pos(10, 5, 10);
+				light_color(1.f, 1.f, 1.f, 0.8f);
+				place_light();
+			}
 			light_done();
 
 			sh_begin();
-
-			t_draw();
-			DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);
-
+			{
+				// t_draw();
+				DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);
+				DrawCube(XYZ(4, 2, 1), 1.f, 1.f, 1.f, BLUE);
+			}
 			sh_end();
-			EndMode3D();
-
-			DrawFPS(5, 5);
 		}
+		EndMode3D();
+		DrawFPS(5, 5);
 		EndDrawing();
 	}
 

@@ -127,9 +127,9 @@ static void generate_chunk(float x, float z) {
 #define Vert(d, _x, _z)                                                                                                \
 	do {                                                                                                           \
 		const int _i = i * 6 + (d);                                                                            \
-		vertices[_i] = Ht((_x), (_z));                                                                         \
-		norms[_i] = Nm((_x), (_z));                                                                            \
-		texcoords[_i] = Tx((_x), (_z));                                                                        \
+		vertices[_i] = Ht(_x, _z);                                                                             \
+		norms[_i] = Nm(_x, _z);                                                                                \
+		texcoords[_i] = Tx(_x, _z);                                                                            \
 		colors[_i] = GREEN;                                                                                    \
 	} while (0)
 
@@ -137,8 +137,8 @@ static void generate_chunk(float x, float z) {
 	Vector2* texcoords = (Vector2*)mesh->texcoords;
 	Color* colors = (Color*)mesh->colors;
 
-	for (int x = 0; x < RESOLUTION; x++)
-		for (int z = 0; z < RESOLUTION; z++) {
+	for (int z = 0; z < RESOLUTION; z++)
+		for (int x = 0; x < RESOLUTION; x++) {
 			/* Vert(0, x, z); */
 			/* Vert(1, x + 1, z); */
 			/* Vert(2, x + 1, z + 1); */
