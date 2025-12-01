@@ -32,16 +32,11 @@ typedef struct Chunk {
 static Chunk* root = NULL;
 static void nuke_chunk(Chunk*);
 
-static Material material = {0};
-
 void t_init() {
 	open_simplex_noise(0, &osn);
-	material = LoadMaterialDefault();
 }
 
 void t_teardown() {
-	UnloadMaterial(material);
-
 	while (root)
 		nuke_chunk(root);
 
@@ -84,8 +79,42 @@ static void nuke_chunk(Chunk* target) {
 	MemFree(target);
 }
 
-static void update_mesh(Chunk* c) {
-	Mesh* mesh = c->model.meshes;
+static bool chunk_exists(float wx, float wz) {
+	const int64_t x = (int64_t)roundf(wx / SIDE), z = (int64_t)roundf(wz / SIDE);
+	for (const Chunk* c = root; c; c = c->next)
+		if (x == c->x && z == c->z)
+			return true;
+	return false;
+}
+
+static void maybe_generate_chunk(float x, float z) {
+	if (chunk_exists(x, z))
+		return;
+
+	Chunk* c = MemAlloc(sizeof(*c));
+	c->next = root, root = c;
+
+	c->x = (int64_t)roundf(x / SIDE);
+	c->z = (int64_t)roundf(z / SIDE);
+
+	Mesh* mesh = MemAlloc(sizeof(*mesh));
+	c->model.meshCount = 1, c->model.meshes = mesh;
+	c->model.transform = MatrixTranslate(x, 0.f, z);
+
+	c->model.materialCount = 1;
+	c->model.materials = MemAlloc(sizeof(Material));
+	c->model.materials[0] = LoadMaterialDefault();
+
+	c->model.meshMaterial = MemAlloc(sizeof(int));
+	c->model.meshMaterial[0] = 0;
+
+	mesh->triangleCount = 2 * (RESOLUTION + 1) * (RESOLUTION + 1);
+	mesh->vertexCount = 3 * mesh->triangleCount;
+
+	mesh->vertices = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
+	mesh->normals = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
+	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
+
 	int i = 0;
 
 #define Ht(_x, _z) XYZ(chunk_center(c).x, c_height(c, (_x), (_z)), chunk_center(c).y)
@@ -115,44 +144,13 @@ static void update_mesh(Chunk* c) {
 			i++;
 		}
 
+	UploadMesh(mesh, false);
+
 #undef Full
 
 #undef Tx
 #undef Nm
 #undef Ht
-}
-
-static bool chunk_exists(float wx, float wz) {
-	const int64_t x = (int64_t)roundf(wx / SIDE), z = (int64_t)roundf(wz / SIDE);
-	for (const Chunk* c = root; c; c = c->next)
-		if (x == c->x && z == c->z)
-			return true;
-	return false;
-}
-
-static void maybe_generate_chunk(float x, float z) {
-	if (chunk_exists(x, z))
-		return;
-
-	Chunk* c = MemAlloc(sizeof(*c));
-	memset(c, 0, sizeof(*c));
-	c->next = root, root = c;
-
-	c->x = (int64_t)roundf(x / SIDE);
-	c->z = (int64_t)roundf(z / SIDE);
-
-	Mesh* mesh = MemAlloc(sizeof(*mesh));
-	c->model.meshCount = 1, c->model.meshes = mesh;
-	c->model.transform = MatrixTranslate(x, 0.f, z);
-	c->model.materialCount = 1, c->model.materials = &material;
-
-	const int res = RESOLUTION + 1;
-	mesh->vertexCount = 6 * res * res;
-	mesh->triangleCount = 2 * res * res;
-
-	mesh->vertices = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
-	mesh->normals = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
-	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 }
 
 void t_update() {
@@ -168,17 +166,9 @@ void t_update() {
 		for (float z = center.y - r; fabsf(z - center.y - r) > EPSILON; z += SIDE)
 			if (Vector2Distance(XY(x, z), center) < VIEW_RADIUS + EPSILON)
 				maybe_generate_chunk(x, z);
-
-	for (Chunk* c = root; c; c = c->next)
-		if (!c->model.meshes)
-			update_mesh(c);
 }
 
 void t_draw() {
-	int k = 0;
-	for (const Chunk* c = root; c; c = c->next) {
-		k += 1;
-		// DrawModel(c->model, Vector3Zero(), 1.f, WHITE);
-	}
-	info("%d chunks", k);
+	for (const Chunk* c = root; c; c = c->next)
+		DrawModel(c->model, Vector3Zero(), 1.f, WHITE);
 }
