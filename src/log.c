@@ -4,6 +4,10 @@
 
 #include "log.h"
 
+void log_die() {
+	exit(EXIT_FAILURE);
+}
+
 static const char* basename(const char* path) {
 	const char* s = strrchr(path, '/');
 	if (!s)

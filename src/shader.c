@@ -1,10 +1,11 @@
 #include <raylib.h>
 
+#include "log.h"
 #include "shader.h"
 
 static const char* VARS[] = {
 	[SHV_TEXTURE] = "texture0",
-	[SHV_DIFFUSE] = "diffuse",
+	[SHV_AMBIENT] = "ambient",
 };
 
 static const char* vsh = R"(
@@ -36,11 +37,12 @@ varying vec2 f_tex_coord;
 varying vec4 f_color;
 
 uniform sampler2D texture0;
-uniform vec4 diffuse;
+uniform vec4 ambient;
 
 void main() {
 	vec4 texel_color = texture2D(texture0, f_tex_coord);
-	gl_FragColor = texel_color * diffuse;
+	vec4 surface_color = f_color * texel_color;
+	gl_FragColor = vec4(mix(surface_color.rgb, ambient.rgb, ambient.a), surface_color.a);
 }
 )";
 
@@ -48,14 +50,18 @@ static Shader shader = {0};
 
 void sh_init() {
 	shader = LoadShaderFromMemory(vsh, fsh);
+	expect(shader.id, "Failed to load shader");
 	// shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "matModel");
 	shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader, "mvp");
-	sh_set(SHV_DIFFUSE, RGB(1.f, 0.f, 0.f), SHADER_UNIFORM_VEC4);
 }
 
 void sh_set(ShaderValue idx, const void* value, int type) {
+	sh_set_v(idx, value, type, 1);
+}
+
+void sh_set_v(ShaderValue idx, const void* value, int type, int count) {
 	idx = GetShaderLocation(shader, VARS[idx]);
-	SetShaderValue(shader, idx, value, type);
+	SetShaderValueV(shader, idx, value, type, count);
 }
 
 void sh_teardown() {

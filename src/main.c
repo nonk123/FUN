@@ -31,8 +31,10 @@ static void realmain() {
 			BeginMode3D(camera);
 			sh_begin();
 
+			sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
+
 			t_draw();
-			DrawCube(ORIGIN, 1.f, 1.f, 1.f, WHITE);
+			DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);
 
 			sh_end();
 			EndMode3D();
