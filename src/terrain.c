@@ -58,7 +58,7 @@ static float pos_noise(float x, float z) {
 static float c_height(const Chunk* c, int64_t x, int64_t z) {
 	const float fx = (float)(c->x * RESOLUTION + x) / RESOLUTION * SIDE;
 	const float fz = (float)(c->z * RESOLUTION + z) / RESOLUTION * SIDE;
-	return pos_noise(fx, fz) * STEEPNESS;
+	return -pos_noise(fx, fz) * STEEPNESS;
 }
 
 static void nuke_chunk(Chunk* target) {
@@ -103,7 +103,10 @@ static void maybe_generate_chunk(float x, float z) {
 
 	c->model.materialCount = 1;
 	c->model.materials = MemAlloc(sizeof(Material));
-	c->model.materials[0] = LoadMaterialDefault();
+
+	Material material = LoadMaterialDefault();
+	// TODO: do stuff with `material`?
+	c->model.materials[0] = material;
 
 	c->model.meshMaterial = MemAlloc(sizeof(int));
 	c->model.meshMaterial[0] = 0;
@@ -134,12 +137,12 @@ static void maybe_generate_chunk(float x, float z) {
 	for (int x = 0; x < RESOLUTION; x++)
 		for (int z = 0; z < RESOLUTION; z++) {
 			Full(0, x, z);
-			Full(1, x + 1, z);
-			Full(2, x + 1, z + 1);
+			Full(1, x + 1, z + 1);
+			Full(2, x + 1, z);
 
 			Full(3, x, z);
-			Full(4, x + 1, z + 1);
-			Full(5, x, z + 1);
+			Full(4, x, z + 1);
+			Full(5, x + 1, z + 1);
 
 			i++;
 		}
@@ -170,5 +173,5 @@ void t_update() {
 
 void t_draw() {
 	for (const Chunk* c = root; c; c = c->next)
-		DrawModel(c->model, Vector3Zero(), 1.f, WHITE);
+		DrawModel(c->model, Vector3Zero(), 1.f, GREEN);
 }
