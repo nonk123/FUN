@@ -32,7 +32,7 @@ static void realmain() {
 		{
 			light_reset();
 			{
-				light_pos(10, 5, 10);
+				light_pos(10, 7, -10);
 				light_color(1.f, 1.f, 1.f, 0.8f);
 				place_light();
 			}

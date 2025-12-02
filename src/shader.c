@@ -59,15 +59,17 @@ void main() {
 
 	vec4 light_color = ambient;
 	for (int i = 0; i < light_count; i++) {
-		vec3 light_norm = normalize(f_pos - lights[i].pos);
+		vec3 light_norm = normalize(lights[i].pos - f_pos);
 		float diffuse = max(0.0, dot(f_norm, light_norm));
 		light_color += lights[i].color * diffuse;
-		light_color = min(light_color, vec4(1.0));
 	}
 
+	light_color = min(light_color, vec4(1.0));
 	vec4 final_color = light_color * surface_color;
+
 	vec3 shadowed = mix(vec3(0.0), final_color.rgb, final_color.a);
 	final_color = vec4(shadowed, surface_color.a);
+
 	gl_FragColor = min(final_color, vec4(1.0));
 }
 )";
