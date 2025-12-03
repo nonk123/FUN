@@ -16,7 +16,7 @@ static struct osn_context* osn = NULL;
 #define SIDE (16.f)
 
 /// Coordinate downscaling factor for noise computation.
-#define SCALE (12.f)
+#define SCALE (1.f)
 
 /// (Temporary) heightmap magnitude.
 #define STEEPNESS (8.f)
@@ -55,10 +55,14 @@ static float pos_noise(float x, float z) {
 	return 1.f + 0.5f * open_simplex_noise2(osn, x, z);
 }
 
-static float c_height(const Chunk* c, int64_t x, int64_t z) {
+static float c_noise(const Chunk* c, int64_t x, int64_t z) {
 	const float fx = ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE;
 	const float fz = ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
-	return (pos_noise(fx / SCALE, fz / SCALE) - 1.f) * STEEPNESS;
+	return pos_noise(fx / SCALE, fz / SCALE);
+}
+
+static float c_height(const Chunk* c, int64_t x, int64_t z) {
+	return (c_noise(c, x, z) - 1.f) * STEEPNESS;
 }
 
 static void nuke_chunk(Chunk* target) {
@@ -120,8 +124,8 @@ static void generate_chunk(float x, float z) {
 
 #define Ht(_x, _z) XYZ((float)(_x) / RESOLUTION * SIDE, c_height(c, (_x), (_z)), (float)(_z) / RESOLUTION * SIDE)
 #define Nm(_x, _z)                                                                                                     \
-	Vector3Normalize(XYZ(c_height(c, (_x) + 1, (_z)) - c_height(c, (_x) - 1, (_z)), 2.f,                           \
-		c_height(c, (_x), (_z) + 1) - c_height(c, (_x), (_z) - 1)))
+	Vector3Normalize(XYZ(c_height(c, (_x) - 1, (_z)) - c_height(c, (_x) + 1, (_z)), 2.f,                           \
+		c_height(c, (_x), (_z) - 1) - c_height(c, (_x), (_z) + 1)))
 #define Tx(_x, _y) XY((float)(_x) / RESOLUTION, (float)(_y) / RESOLUTION)
 
 #define Vert(d, _x, _z)                                                                                                \
@@ -190,7 +194,7 @@ void t_update() {
 
 void t_draw() {
 	for (const Chunk* c = root; c; c = c->next) {
-		Vector3 pos = {.x = SIDE * (0.5f + (float)c->x), .y = 0.f, .z = SIDE * (0.5f + (float)c->z)};
+		Vector3 pos = {.x = SIDE * (float)c->x, .y = 0.f, .z = SIDE * (float)c->z};
 		DrawModel(c->model, pos, 1.f, WHITE);
 	}
 }

@@ -40,7 +40,7 @@ static void realmain() {
 
 			sh_begin();
 			{
-				// t_draw();
+				t_draw();
 				DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);
 				DrawCube(XYZ(4, 2, 1), 1.f, 1.f, 1.f, BLUE);
 			}
