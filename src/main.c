@@ -22,8 +22,21 @@ static void realmain() {
 
 	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
 
+	Vector3 pos = XYZ(10, 10, 10);
+
 	while (!WindowShouldClose()) {
-		look_dir(XYZ(10, 10, 10), XYZ(-1, -1, -1));
+		Vector3 vel = ORIGIN;
+		if (IsKeyDown(KEY_A))
+			vel.x -= 1.f;
+		if (IsKeyDown(KEY_D))
+			vel.x += 1.f;
+		if (IsKeyDown(KEY_S))
+			vel.z += 1.f;
+		if (IsKeyDown(KEY_W))
+			vel.z -= 1.f;
+		pos = Vector3Add(pos, Vector3Normalize(vel));
+		look_dir(pos, XYZ(-1, -1, -1));
+
 		t_update();
 
 		BeginDrawing();
@@ -34,6 +47,7 @@ static void realmain() {
 			{
 				light_pos(10, 7, -10);
 				light_color(1.f, 1.f, 1.f, 0.8f);
+				light_radius(10.f);
 				place_light();
 			}
 			light_done();
