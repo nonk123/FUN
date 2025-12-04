@@ -19,6 +19,9 @@ static struct osn_context* osn = NULL;
 /// Coordinate downscaling factor for noise computation.
 #define SCALE (10.f)
 
+/// Another scaling factor for the second noise function.
+#define OCTAVE (2.1f)
+
 /// (Temporary) heightmap magnitude.
 #define STEEPNESS (8.f)
 
@@ -56,14 +59,15 @@ static float pos_noise(float x, float z) {
 	return 1.f + 0.5f * open_simplex_noise2(osn, x, z);
 }
 
-static float c_noise(const Chunk* c, int64_t x, int64_t z) {
-	const float fx = ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE;
-	const float fz = ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
-	return pos_noise(fx / SCALE, fz / SCALE);
+static float c_noise(const Chunk* c, int64_t x, int64_t z, int octave) {
+	const float octaves[2] = {1.f, OCTAVE}, scale = octaves[octave] * SCALE;
+	const float fx = ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE,
+		    fz = ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
+	return pos_noise(fx / scale, fz / scale);
 }
 
 static float c_height(const Chunk* c, int64_t x, int64_t z) {
-	return (c_noise(c, x, z) - 1.f) * STEEPNESS;
+	return (c_noise(c, x, z, 0) * c_noise(c, x, z, 1) - 1.f) * STEEPNESS;
 }
 
 static void nuke_chunk(Chunk* target) {
