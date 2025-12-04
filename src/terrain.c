@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include "shader.h"
 #include "terrain.h"
 #include "vecmath.h"
 
@@ -16,7 +17,7 @@ static struct osn_context* osn = NULL;
 #define SIDE (16.f)
 
 /// Coordinate downscaling factor for noise computation.
-#define SCALE (1.f)
+#define SCALE (10.f)
 
 /// (Temporary) heightmap magnitude.
 #define STEEPNESS (8.f)
@@ -106,7 +107,7 @@ static void generate_chunk(float x, float z) {
 	c->model.materials = MemAlloc(sizeof(Material));
 
 	Material material = LoadMaterialDefault();
-	// TODO: do stuff with `material`?
+	material.shader = sh_get();
 	c->model.materials[0] = material;
 
 	c->model.meshMaterial = MemAlloc(sizeof(int));
@@ -120,8 +121,6 @@ static void generate_chunk(float x, float z) {
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
-	int i = 0;
-
 #define Ht(_x, _z) XYZ((float)(_x) / RESOLUTION * SIDE, c_height(c, (_x), (_z)), (float)(_z) / RESOLUTION * SIDE)
 #define Nm(_x, _z)                                                                                                     \
 	Vector3Normalize(XYZ(c_height(c, (_x) - 1, (_z)) - c_height(c, (_x) + 1, (_z)), 2.f,                           \
@@ -130,7 +129,7 @@ static void generate_chunk(float x, float z) {
 
 #define Vert(d, _x, _z)                                                                                                \
 	do {                                                                                                           \
-		const int _i = i * 6 + (d);                                                                            \
+		const size_t _i = i + (d);                                                                             \
 		vertices[_i] = Ht(_x, _z);                                                                             \
 		norms[_i] = Nm(_x, _z);                                                                                \
 		texcoords[_i] = Tx(_x, _z);                                                                            \
@@ -140,6 +139,8 @@ static void generate_chunk(float x, float z) {
 	Vector3 *vertices = (Vector3*)mesh->vertices, *norms = (Vector3*)mesh->normals;
 	Vector2* texcoords = (Vector2*)mesh->texcoords;
 	Color* colors = (Color*)mesh->colors;
+
+	size_t i = 0;
 
 	for (int z = 0; z < RESOLUTION; z++)
 		for (int x = 0; x < RESOLUTION; x++) {
@@ -159,7 +160,7 @@ static void generate_chunk(float x, float z) {
 			Vert(4, x, z + 1);
 			Vert(5, x + 1, z + 1);
 
-			i++;
+			i += 6;
 		}
 
 	UploadMesh(mesh, false);

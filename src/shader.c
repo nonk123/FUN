@@ -70,12 +70,16 @@ void main() {
 	vec3 shadowed = mix(vec3(0.0), final_color.rgb, final_color.a);
 	final_color = vec4(shadowed, surface_color.a);
 
-	gl_FragColor = vec4(f_norm, 1.0);
-	/* gl_FragColor = min(final_color, vec4(1.0)); */
+	/* gl_FragColor = vec4(f_norm, 1.0); */
+	gl_FragColor = min(final_color, vec4(1.0));
 }
 )";
 
 static Shader shader = {0};
+
+Shader sh_get() {
+	return shader;
+}
 
 void sh_init() {
 	shader = LoadShaderFromMemory(vsh, fsh);
