@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include "assets.h"
 #include "shader.h"
 #include "terrain.h"
 #include "vecmath.h"
@@ -37,11 +38,15 @@ typedef struct Chunk {
 static Chunk* root = NULL;
 static void nuke_chunk(Chunk*);
 
+static Texture2D green_grass = {0};
+
 void t_init() {
 	open_simplex_noise(0, &osn);
+	green_grass = LoadTexture(ASSETS "/green-grass.png");
 }
 
 void t_teardown() {
+	UnloadTexture(green_grass);
 	while (root)
 		nuke_chunk(root);
 	open_simplex_noise_free(osn);
@@ -109,9 +114,10 @@ static void generate_chunk(float x, float z) {
 	c->model.transform = MatrixIdentity();
 
 	c->model.materialCount = 1;
-	c->model.materials = MemAlloc(sizeof(Material));
+	c->model.materials = MemAlloc(sizeof(Material) * c->model.materialCount);
 
 	Material material = make_material();
+	material.maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
 	c->model.materials[0] = material;
 
 	c->model.meshMaterial = MemAlloc(sizeof(int));

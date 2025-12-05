@@ -40,7 +40,6 @@ endfunction()
 
 embed_txt(shaders/base.vsh)
 embed_txt(shaders/base.fsh)
-embed_txt(shaders/terrain.fsh)
 
 add_executable(fun ${SOURCES} ${HEADERS})
 target_link_libraries(fun PRIVATE raylib noise)
@@ -48,3 +47,12 @@ target_include_directories(fun
     PRIVATE ${CMAKE_SOURCE_DIR}/include ${GENERATED})
 target_compile_definitions(fun
     PRIVATE _POSIX_C_SOURCE=200112L _WIN32_WINNT=0x0501 WINVER=0x0501)
+
+add_custom_command(TARGET fun POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory
+    $<TARGET_FILE_DIR:fun>/assets
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:fun>/assets
+
+    COMMAND_EXPAND_LISTS)

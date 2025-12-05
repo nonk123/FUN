@@ -9,6 +9,7 @@ typedef enum {
 	SHV_TEXTURE,
 	SHV_AMBIENT,
 	SHV_LIGHT_COUNT,
+	SHV_UV_SCALE,
 } ShaderValue;
 
 void sh_init(), sh_teardown();

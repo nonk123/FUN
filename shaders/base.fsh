@@ -13,6 +13,7 @@ varying vec4 f_color;
 
 uniform sampler2D texture0;
 uniform vec4 ambient;
+uniform float uv_scale;
 
 uniform int light_count;
 uniform struct {
@@ -22,7 +23,7 @@ uniform struct {
 } lights[MAX_LIGHTS];
 
 void main() {
-	vec4 texel_color = texture2D(texture0, f_uv);
+	vec4 texel_color = texture2D(texture0, f_uv / uv_scale);
 	vec4 surface_color = f_color * texel_color;
 
 	vec4 light_color = ambient;
