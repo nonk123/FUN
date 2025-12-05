@@ -149,14 +149,6 @@ static void generate_chunk(float x, float z) {
 
 	for (int z = 0; z < RESOLUTION; z++)
 		for (int x = 0; x < RESOLUTION; x++) {
-			/* Vert(0, x, z); */
-			/* Vert(1, x + 1, z); */
-			/* Vert(2, x + 1, z + 1); */
-
-			/* Vert(3, x, z); */
-			/* Vert(4, x + 1, z + 1); */
-			/* Vert(5, x, z + 1); */
-
 			Vert(0, x, z);
 			Vert(1, x + 1, z + 1);
 			Vert(2, x + 1, z);
