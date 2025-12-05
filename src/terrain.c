@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 #include <open-simplex-noise.h>
 #include <raylib.h>
@@ -41,7 +42,7 @@ static void nuke_chunk(Chunk*);
 static Texture2D green_grass = {0};
 
 void t_init() {
-	open_simplex_noise(0, &osn);
+	open_simplex_noise(time(NULL), &osn);
 	green_grass = LoadTexture(ASSETS "/green-grass.png");
 }
 
