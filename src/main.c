@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 #include "camera.h"
+#include "car.h"
 #include "light.h"
 #include "log.h"
 #include "shader.h"
@@ -15,9 +16,14 @@ static void realmain() {
 	InitWindow(800, 600, "FUN."), InitAudioDevice();
 
 	SetExitKey(KEY_BACKSPACE);
-	sh_init(), t_init();
+	sh_init(), t_init(), car_init();
 
 	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
+
+	spawn_car(0.f, 0.f);
+	spawn_car(10.f, 0.f);
+	spawn_car(10.f, 10.f);
+	spawn_car(0.f, 10.f);
 
 	Vector3 pos = XYZ(10, 13, 10);
 	const float speed = 30.f;
@@ -52,12 +58,18 @@ static void realmain() {
 
 		sh_begin();
 		{
-			float uv_scale = 2.f;
+			float uv_scale = 1.f;
+			sh_set(SHV_UV_SCALE, &uv_scale, SHADER_UNIFORM_FLOAT);
+
+			for (int i = 0; i < MAX_CARS; i++) {
+				const Car* car = NULL;
+				if ((car = get_car(i)))
+					car_draw(car);
+			}
+
+			uv_scale = 2.f;
 			sh_set(SHV_UV_SCALE, &uv_scale, SHADER_UNIFORM_FLOAT);
 			t_draw();
-
-			uv_scale = 1.f;
-			sh_set(SHV_UV_SCALE, &uv_scale, SHADER_UNIFORM_FLOAT);
 
 			/* DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED); */
 			/* DrawCube(XYZ(4, 2, 1), 1.f, 1.f, 1.f, BLUE); */
@@ -69,7 +81,7 @@ static void realmain() {
 		EndDrawing();
 	}
 
-	t_teardown(), sh_teardown();
+	car_teardown(), t_teardown(), sh_teardown();
 	CloseAudioDevice(), CloseWindow();
 }
 

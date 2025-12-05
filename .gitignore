@@ -2,3 +2,4 @@
 /.cache
 /__cmake*
 compile_commands.json
+*.blend1
