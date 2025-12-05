@@ -23,20 +23,18 @@ static void realmain() {
 	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
 
 	Vector3 pos = XYZ(10, 10, 10);
+	const float speed = 30.f;
 
 	while (!WindowShouldClose()) {
-		Vector3 vel = ORIGIN;
-		if (IsKeyDown(KEY_A))
-			vel.x -= 1.f;
-		if (IsKeyDown(KEY_D))
-			vel.x += 1.f;
-		if (IsKeyDown(KEY_S))
-			vel.z += 1.f;
-		if (IsKeyDown(KEY_W))
-			vel.z -= 1.f;
-		pos = Vector3Add(pos, Vector3Normalize(vel));
-		look_dir(pos, XYZ(-1, -1, -1));
+		{
+			Vector3 dir = ORIGIN;
+			dir.x += (float)(IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
+			dir.z += (float)(IsKeyDown(KEY_S) - IsKeyDown(KEY_W));
+			dir = Vector3Normalize(dir);
+			pos = Vector3Add(pos, Vector3Scale(dir, speed * GetFrameTime()));
+		}
 
+		look_dir(pos, XYZ(-1, -1, -1));
 		t_update();
 
 		BeginDrawing();
