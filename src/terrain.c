@@ -143,7 +143,7 @@ static void generate_chunk(float x, float z) {
 		vertices[_i] = Ht(_x, _z);                                                                             \
 		norms[_i] = Nm(_x, _z);                                                                                \
 		texcoords[_i] = Tx(_x, _z);                                                                            \
-		colors[_i] = GREEN;                                                                                    \
+		colors[_i] = WHITE;                                                                                    \
 	} while (0)
 
 	Vector3 *vertices = (Vector3*)mesh->vertices, *norms = (Vector3*)mesh->normals;
