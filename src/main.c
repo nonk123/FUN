@@ -52,7 +52,7 @@ static void realmain() {
 
 		sh_begin();
 		{
-			float uv_scale = 1.8f;
+			float uv_scale = 2.f;
 			sh_set(SHV_UV_SCALE, &uv_scale, SHADER_UNIFORM_FLOAT);
 			t_draw();
 
