@@ -30,9 +30,21 @@ target_compile_definitions(noise PUBLIC OSNFLOAT=float)
 file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.c)
 file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/include/*.h)
 
+set(GENERATED ${CMAKE_BINARY_DIR}/generated)
+file(MAKE_DIRECTORY ${GENERATED})
+
+function(embed_txt FILENAME)
+    file(READ ${CMAKE_SOURCE_DIR}/${FILENAME} CONTENTS)
+    file(WRITE ${GENERATED}/${FILENAME} "R\"(${CONTENTS})\"")
+endfunction()
+
+embed_txt(shaders/base.vsh)
+embed_txt(shaders/base.fsh)
+embed_txt(shaders/terrain.fsh)
+
 add_executable(fun ${SOURCES} ${HEADERS})
 target_link_libraries(fun PRIVATE raylib noise)
 target_include_directories(fun
-    PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    PRIVATE ${CMAKE_SOURCE_DIR}/include ${GENERATED})
 target_compile_definitions(fun
     PRIVATE _POSIX_C_SOURCE=200112L _WIN32_WINNT=0x0501 WINVER=0x0501)

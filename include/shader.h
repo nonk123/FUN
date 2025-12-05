@@ -18,4 +18,4 @@ void sh_set(ShaderValue idx, const void* value, int type);
 void sh_set_v(ShaderValue idx, const void* value, int type, int count);
 void sh_set_raw(const char* name, const void* value, int type, int count);
 
-Shader sh_get();
+Material make_material();

@@ -111,8 +111,7 @@ static void generate_chunk(float x, float z) {
 	c->model.materialCount = 1;
 	c->model.materials = MemAlloc(sizeof(Material));
 
-	Material material = LoadMaterialDefault();
-	material.shader = sh_get();
+	Material material = make_material();
 	c->model.materials[0] = material;
 
 	c->model.meshMaterial = MemAlloc(sizeof(int));
