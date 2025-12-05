@@ -35,10 +35,15 @@ static void realmain() {
 			dir.z += (float)(IsKeyDown(KEY_S) - IsKeyDown(KEY_W));
 			dir = Vector3Normalize(dir);
 			pos = Vector3Add(pos, Vector3Scale(dir, speed * GetFrameTime()));
+			look_dir(pos, XYZ(-1, -1, -1));
 		}
 
-		look_dir(pos, XYZ(-1, -1, -1));
-		t_update();
+		{
+			extern void reset_terrain();
+			if (IsKeyPressed(KEY_R))
+				reset_terrain();
+			t_update();
+		}
 
 		BeginDrawing();
 		ClearBackground(BLACK);

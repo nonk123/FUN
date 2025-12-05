@@ -10,8 +10,6 @@
 #include "terrain.h"
 #include "vecmath.h"
 
-static struct osn_context* osn = NULL;
-
 /// Points per side of a chunk.
 #define RESOLUTION (16)
 
@@ -36,22 +34,35 @@ typedef struct Chunk {
 	struct Chunk* next;
 } Chunk;
 
+static struct osn_context* osn = NULL;
+
 static Chunk* root = NULL;
 static void nuke_chunk(Chunk*);
 
 static Texture2D green_grass = {0};
 
-void t_init() {
+static void kill_terrain() {
+	while (root)
+		nuke_chunk(root);
+	if (osn) {
+		open_simplex_noise_free(osn);
+		osn = NULL;
+	}
+}
+
+void reset_terrain() { // used in `main.c`
+	kill_terrain();
 	open_simplex_noise(time(NULL), &osn);
+}
+
+void t_init() {
+	reset_terrain();
 	green_grass = LoadTexture(ASSETS "/green-grass.png");
 }
 
 void t_teardown() {
 	UnloadTexture(green_grass);
-	while (root)
-		nuke_chunk(root);
-	open_simplex_noise_free(osn);
-	osn = NULL;
+	kill_terrain();
 }
 
 static Vector2 chunk_center(const Chunk* ch) {
