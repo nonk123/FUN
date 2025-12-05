@@ -19,13 +19,13 @@ static struct osn_context* osn = NULL;
 #define SIDE (16.f)
 
 /// Coordinate downscaling factor for noise computation.
-#define SCALE (10.f)
+#define SCALE (20.f)
 
 /// Another scaling factor for the second noise function.
 #define OCTAVE (2.1f)
 
 /// (Temporary) heightmap magnitude.
-#define STEEPNESS (8.f)
+#define STEEPNESS (12.f)
 
 /// Maximum distance to a chunk's center before unloading.
 #define VIEW_RADIUS (128.f)
@@ -71,10 +71,29 @@ float t_height(float x, float z) {
 	return (pos_noise(x, z, 0) * pos_noise(x, z, 1) - 1.f) * STEEPNESS;
 }
 
+static float c_x(const Chunk* c, int64_t x) {
+	return ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE;
+}
+
+static float c_z(const Chunk* c, int64_t z) {
+	return ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
+}
+
 static float c_height(const Chunk* c, int64_t x, int64_t z) {
-	const float fx = ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE,
-		    fz = ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
-	return t_height(fx, fz);
+	return t_height(c_x(c, x), c_z(c, z));
+}
+
+Vector3 t_norm(float x, float z) {
+	const float step = SIDE / (float)RESOLUTION;
+
+	Vector3 norm = XYZ(0, 2, 0);
+	norm.x = t_height(x - step, z) - t_height(x + step, z);
+	norm.z = t_height(x, z - step) - t_height(x, z + step);
+	return Vector3Normalize(norm);
+}
+
+static Vector3 c_norm(const Chunk* c, int64_t x, int64_t z) {
+	return t_norm(c_x(c, x), c_z(c, z));
 }
 
 static void nuke_chunk(Chunk* target) {
@@ -132,18 +151,13 @@ static void generate_chunk(float x, float z) {
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
-#define Ht(_x, _z) XYZ((float)(_x) / RESOLUTION * SIDE, c_height(c, (_x), (_z)), (float)(_z) / RESOLUTION * SIDE)
-#define Nm(_x, _z)                                                                                                     \
-	Vector3Normalize(XYZ(c_height(c, (_x) - 1, (_z)) - c_height(c, (_x) + 1, (_z)), 2.f,                           \
-		c_height(c, (_x), (_z) - 1) - c_height(c, (_x), (_z) + 1)))
-#define Tx(_x, _y) XY((float)(_x) / RESOLUTION, (float)(_y) / RESOLUTION)
-
 #define Vert(d, _x, _z)                                                                                                \
 	do {                                                                                                           \
 		const size_t _i = i + (d);                                                                             \
-		vertices[_i] = Ht(_x, _z);                                                                             \
-		norms[_i] = Nm(_x, _z);                                                                                \
-		texcoords[_i] = Tx(_x, _z);                                                                            \
+		vertices[_i] = XYZ(                                                                                    \
+			(float)(_x) / RESOLUTION * SIDE, c_height(c, (_x), (_z)), (float)(_z) / RESOLUTION * SIDE);    \
+		norms[_i] = c_norm(c, (_x), (_z));                                                                     \
+		texcoords[_i] = XY((float)(_x) / RESOLUTION, (float)(_z) / RESOLUTION);                                \
 		colors[_i] = WHITE;                                                                                    \
 	} while (0)
 
@@ -169,10 +183,6 @@ static void generate_chunk(float x, float z) {
 	UploadMesh(mesh, false);
 
 #undef Vert
-
-#undef Tx
-#undef Nm
-#undef Ht
 }
 
 void t_update() {

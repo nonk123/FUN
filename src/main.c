@@ -22,7 +22,7 @@ static void realmain() {
 
 	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
 
-	Vector3 pos = XYZ(10, 10, 10);
+	Vector3 pos = XYZ(10, 13, 10);
 	const float speed = 30.f;
 
 	while (!WindowShouldClose()) {
@@ -59,8 +59,8 @@ static void realmain() {
 			uv_scale = 1.f;
 			sh_set(SHV_UV_SCALE, &uv_scale, SHADER_UNIFORM_FLOAT);
 
-			DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED);
-			DrawCube(XYZ(4, 2, 1), 1.f, 1.f, 1.f, BLUE);
+			/* DrawCube(ORIGIN, 1.f, 1.f, 1.f, RED); */
+			/* DrawCube(XYZ(4, 2, 1), 1.f, 1.f, 1.f, BLUE); */
 		}
 		sh_end();
 
