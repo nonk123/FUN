@@ -55,19 +55,20 @@ static Vector2 chunk_center(const Chunk* ch) {
 	return c;
 }
 
-static float pos_noise(float x, float z) {
+static float pos_noise(float x, float z, int octave) {
+	const float octaves[2] = {1.f, OCTAVE}, scale = octaves[octave] * SCALE;
+	x /= scale, z /= scale;
 	return 1.f + 0.5f * open_simplex_noise2(osn, x, z);
 }
 
-static float c_noise(const Chunk* c, int64_t x, int64_t z, int octave) {
-	const float octaves[2] = {1.f, OCTAVE}, scale = octaves[octave] * SCALE;
-	const float fx = ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE,
-		    fz = ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
-	return pos_noise(fx / scale, fz / scale);
+float t_height(float x, float z) {
+	return (pos_noise(x, z, 0) * pos_noise(x, z, 1) - 1.f) * STEEPNESS;
 }
 
 static float c_height(const Chunk* c, int64_t x, int64_t z) {
-	return (c_noise(c, x, z, 0) * c_noise(c, x, z, 1) - 1.f) * STEEPNESS;
+	const float fx = ((float)(c->x * RESOLUTION + x) / RESOLUTION) * SIDE,
+		    fz = ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
+	return t_height(fx, fz);
 }
 
 static void nuke_chunk(Chunk* target) {
