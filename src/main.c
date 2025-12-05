@@ -11,11 +11,8 @@
 int exitcode = EXIT_SUCCESS; // also used in `log.c`
 
 static void realmain() {
-	extern Camera3D camera;
-
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-	InitWindow(800, 600, "FUN.");
-	InitAudioDevice();
+	InitWindow(800, 600, "FUN."), InitAudioDevice();
 
 	SetExitKey(KEY_BACKSPACE);
 	sh_init(), t_init();
@@ -39,7 +36,10 @@ static void realmain() {
 
 		BeginDrawing();
 		ClearBackground(BLACK);
-		BeginMode3D(camera);
+		{
+			extern Camera3D camera;
+			BeginMode3D(camera);
+		}
 
 		light_reset();
 		{
@@ -70,9 +70,7 @@ static void realmain() {
 	}
 
 	t_teardown(), sh_teardown();
-
-	CloseAudioDevice();
-	CloseWindow();
+	CloseAudioDevice(), CloseWindow();
 }
 
 int main(int argc, char* argv[]) {
