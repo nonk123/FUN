@@ -6,6 +6,7 @@
 #include "assets.h"
 #include "car.h"
 #include "log.h"
+#include "raylibext.h"
 #include "terrain.h"
 #include "vecmath.h"
 
@@ -31,6 +32,7 @@ Car* spawn_car(float x, float z) {
 			continue;
 		cars[i] = MemAlloc(sizeof(Car));
 		cars[i]->id = i, cars[i]->x = x, cars[i]->z = z;
+		cars[i]->yaw = 0.f;
 		cars[i]->model = model;
 		return cars[i];
 	}
@@ -39,9 +41,19 @@ Car* spawn_car(float x, float z) {
 	return NULL;
 }
 
+float car_pitch(const Car* car) {
+	const float step = 0.2f;
+	const Vector2 pos = XY(car->x, car->z), dir = Vector2Rotate(XY(0, -1), car->yaw),
+		      dist = Vector2Scale(dir, step), front = Vector2Add(pos, dist);
+	return atanf((t_height(front.x, front.y) - t_height(pos.x, pos.y)) / step);
+}
+
 void car_draw(const Car* car) {
-	const Vector3 scale = XYZ(1, 1, 1), pos = XYZ(car->x, t_height(car->x, car->z), car->z);
-	DrawModelEx(car->model, pos, UP, 0.f, scale, WHITE);
+	const Matrix trans = MatrixTranslate(car->x, t_height(car->x, car->z), car->z),
+		     scale = MatrixScale(1.f, 1.f, 1.f), roty = MatrixRotateY(car->yaw),
+		     rotx = MatrixRotateX(car_pitch(car)),
+		     transform = MatrixMultiply(MatrixMultiply(MatrixMultiply(scale, rotx), roty), trans);
+	DrawModelPro(car->model, transform, WHITE);
 }
 
 Car* get_car(int id) {

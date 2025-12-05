@@ -25,7 +25,7 @@ static struct osn_context* osn = NULL;
 #define OCTAVE (2.1f)
 
 /// (Temporary) heightmap magnitude.
-#define STEEPNESS (12.f)
+#define STEEPNESS (8.f)
 
 /// Maximum distance to a chunk's center before unloading.
 #define VIEW_RADIUS (128.f)
