@@ -48,5 +48,5 @@ static void log_cb(int level, const char* fmt, va_list args) {
 
 void log_init() {
 	SetTraceLogCallback(log_cb);
-	SetTraceLogLevel(LOG_WARNING);
+	SetTraceLogLevel(LOG_INFO);
 }

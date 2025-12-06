@@ -25,8 +25,8 @@
 /// (Temporary) heightmap magnitude.
 #define STEEPNESS (8.f)
 
-/// Maximum distance to a chunk's center before unloading.
-#define VIEW_RADIUS (128.f)
+/// How many chunks to keep loaded around the camera.
+#define VIEW_RADIUS (5)
 
 typedef struct Chunk {
 	int64_t x, z;
@@ -67,8 +67,8 @@ void t_teardown() {
 
 static Vector2 chunk_center(const Chunk* ch) {
 	Vector2 c = {0};
-	c.x = roundf((float)ch->x * SIDE);
-	c.y = roundf((float)ch->z * SIDE);
+	c.x = floorf((float)ch->x * SIDE);
+	c.y = floorf((float)ch->z * SIDE);
 	return c;
 }
 
@@ -126,7 +126,7 @@ static void nuke_chunk(Chunk* target) {
 }
 
 static bool chunk_exists(float wx, float wz) {
-	const int64_t x = (int64_t)roundf(wx / SIDE), z = (int64_t)roundf(wz / SIDE);
+	const int64_t x = (int64_t)(wx / SIDE), z = (int64_t)(wz / SIDE);
 	for (const Chunk* c = root; c; c = c->next)
 		if (x == c->x && z == c->z)
 			return true;
@@ -137,8 +137,8 @@ static void generate_chunk(float x, float z) {
 	Chunk* c = MemAlloc(sizeof(*c));
 	c->next = root, root = c;
 
-	c->x = (int64_t)roundf(x / SIDE);
-	c->z = (int64_t)roundf(z / SIDE);
+	c->x = (int64_t)(x / SIDE);
+	c->z = (int64_t)(z / SIDE);
 
 	Mesh* mesh = MemAlloc(sizeof(*mesh));
 	c->model.meshCount = 1, c->model.meshes = mesh;
@@ -195,21 +195,24 @@ static void generate_chunk(float x, float z) {
 #undef Vert
 }
 
+static int64_t i64abs(int64_t x) {
+	return x < 0 ? -x : x;
+}
+
 void t_update() {
 	extern Camera3D camera;
-	const Vector2 center = {.x = camera.position.x, .y = camera.position.z};
+	const Vector2 centerf = {.x = camera.position.x, .y = camera.position.z};
+	const int64_t centerx = (int64_t)(floorf(centerf.x) / SIDE), centerz = (int64_t)(floorf(centerf.y) / SIDE);
 
 	for (Chunk* c = root; c; c = c->next)
-		if (Vector2Distance(chunk_center(c), center) - VIEW_RADIUS > EPSILON)
+		if (i64abs(c->x - centerx) > VIEW_RADIUS || i64abs(c->z - centerz) > VIEW_RADIUS)
 			nuke_chunk(c);
 
-	const int idim = (int)roundf((2.f * VIEW_RADIUS) / SIDE);
-	for (int ix = 0; ix < idim; ix++)
-		for (int iz = 0; iz < idim; iz++) {
-			const float x = center.x - VIEW_RADIUS + (float)ix * SIDE,
-				    z = center.y - VIEW_RADIUS + (float)iz * SIDE;
-			if (Vector2Distance(XY(x, z), center) - VIEW_RADIUS > -EPSILON)
+	for (int64_t ix = -VIEW_RADIUS; ix <= VIEW_RADIUS; ix++)
+		for (int64_t iz = -VIEW_RADIUS; iz <= VIEW_RADIUS; iz++) {
+			if (i64abs(centerx - ix) > VIEW_RADIUS || i64abs(centerz - iz) > VIEW_RADIUS)
 				continue;
+			const float x = centerf.x + (float)ix * SIDE, z = centerf.y + (float)iz * SIDE;
 			if (chunk_exists(x, z))
 				continue;
 			generate_chunk(x, z);
