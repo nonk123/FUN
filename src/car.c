@@ -45,18 +45,26 @@ Car* spawn_car(float x, float z) {
 	return NULL;
 }
 
+static float car_angle_at(const Car* car, Vector2 dir, float step) {
+	dir = Vector2Rotate(dir, car->yaw);
+	const Vector2 pos = XY(car->x, car->z), dist = Vector2Scale(dir, step), end = Vector2Add(pos, dist);
+	return atanf((t_height(end.x, end.y) - t_height(pos.x, pos.y)) / step);
+}
+
 float car_pitch(const Car* car) {
-	const float step = 0.2f;
-	const Vector2 pos = XY(car->x, car->z), dir = Vector2Rotate(XY(0, -1), car->yaw),
-		      dist = Vector2Scale(dir, step), front = Vector2Add(pos, dist);
-	return atanf((t_height(front.x, front.y) - t_height(pos.x, pos.y)) / step);
+	return car_angle_at(car, XY(0, -1), 0.2f);
+}
+
+float car_roll(const Car* car) {
+	return car_angle_at(car, XY(1, 0), 0.2f);
 }
 
 void car_draw(const Car* car) {
 	const Matrix trans = MatrixTranslate(car->x, t_height(car->x, car->z), car->z),
 		     scale = MatrixScale(1.f, 1.f, 1.f), roty = MatrixRotateY(car->yaw),
-		     rotx = MatrixRotateX(car_pitch(car)),
-		     transform = MatrixMultiply(MatrixMultiply(MatrixMultiply(scale, rotx), roty), trans);
+		     rotx = MatrixRotateX(car_pitch(car)), rotz = MatrixRotateZ(car_roll(car)),
+		     rotations = MatrixMultiply(MatrixMultiply(MatrixMultiply(scale, rotz), rotx), roty),
+		     transform = MatrixMultiply(rotations, trans);
 	DrawModelPro(car->model, transform, WHITE);
 }
 
