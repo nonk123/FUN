@@ -35,7 +35,7 @@ Car* spawn_car(float x, float z) {
 		if (cars[i])
 			continue;
 		cars[i] = MemAlloc(sizeof(Car));
-		cars[i]->id = i, cars[i]->x = x, cars[i]->z = z;
+		cars[i]->id = i + 1, cars[i]->x = x, cars[i]->z = z;
 		cars[i]->yaw = 0.f;
 		cars[i]->model = model;
 		return cars[i];
@@ -69,6 +69,6 @@ void car_draw(const Car* car) {
 }
 
 Car* get_car(int id) {
-	expect(id >= 0 && id < MAX_CARS, "wtf is %d car", id);
-	return cars[id];
+	expect(id > 0 && id <= MAX_CARS, "wtf is %d car", id);
+	return cars[id - 1];
 }

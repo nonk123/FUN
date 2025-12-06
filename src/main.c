@@ -10,6 +10,7 @@
 #include "terrain.h"
 
 int exitcode = EXIT_SUCCESS; // also used in `log.c`
+static int player_car = 0;
 
 static void realmain() {
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
@@ -20,22 +21,25 @@ static void realmain() {
 
 	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
 
-	spawn_car(0.f, 0.f);
-	spawn_car(10.f, 0.f);
-	spawn_car(10.f, 10.f);
-	spawn_car(0.f, 10.f);
+	player_car = spawn_car(0.f, 0.f)->id;
+	spawn_car(20.f, 0.f);
+	spawn_car(20.f, 50.f);
+	spawn_car(0.f, 50.f);
 
-	Vector3 pos = XYZ(10, 13, 10);
+	Vector3 cam_pos = XYZ(10, 13, 10);
 	const float speed = 30.f;
 
 	while (!WindowShouldClose()) {
-		{
-			Vector3 dir = ORIGIN;
-			dir.x += (float)(IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
-			dir.z += (float)(IsKeyDown(KEY_S) - IsKeyDown(KEY_W));
-			dir = Vector3Normalize(dir);
-			pos = Vector3Add(pos, Vector3Scale(dir, speed * GetFrameTime()));
-			look_dir(pos, XYZ(-1, -1, -1));
+		if (player_car) {
+			const Car* c = get_car(player_car);
+			cam_pos = XYZ(c->x, 0.f, c->z);
+			Vector3 back = XYZ(0, 0, 12.f);
+			back = Vector3RotateByAxisAngle(back, UP, c->yaw);
+			cam_pos = Vector3Add(cam_pos, back);
+			cam_pos.y = t_height(cam_pos.x, cam_pos.z) + 2.f;
+			look_at(cam_pos, XYZ(c->x, t_height(c->x, c->z) + 0.6, c->z));
+		} else {
+			look_at(cam_pos, XYZ(-1, -1, -1));
 		}
 
 		{
@@ -66,9 +70,9 @@ static void realmain() {
 			float uv_scale = 1.f;
 			sh_set(SHV_UV_SCALE, &uv_scale, SHADER_UNIFORM_FLOAT);
 
-			for (int i = 0; i < MAX_CARS; i++) {
+			for (int id = 1; id <= MAX_CARS; id++) {
 				const Car* car = NULL;
-				if ((car = get_car(i)))
+				if ((car = get_car(id)))
 					car_draw(car);
 			}
 
