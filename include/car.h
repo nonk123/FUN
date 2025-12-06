@@ -15,8 +15,8 @@ enum {
 };
 
 typedef struct {
-	float x, z, yaw, torque;
-	Vector2 linvel;
+	float yaw, torque;
+	Vector2 pos, linvel;
 	Model models[CARMODEL_COUNT];
 	int id;
 } Car;
@@ -24,7 +24,8 @@ typedef struct {
 void car_init(), car_teardown();
 Car *spawn_car(float x, float z), *get_car(int);
 
-float car_pitch(const Car* car);
+Vector3 car_pos(const Car* car);
+float car_pitch(const Car* car), car_roll(const Car* car);
 void car_draw(const Car*);
 
 void car_control(Car*, Vector2);

@@ -27,14 +27,21 @@ void restart() {
 void game_update() {
 	if (player_car) {
 		const Car* c = get_car(player_car);
-		cam_pos = XYZ(c->x, 0.f, c->z);
-		Vector3 back = XYZ(0, 0, 12.f);
+
+		Vector3 back = XYZ(0, 1.5f, -12.f);
+		back = Vector3RotateByAxisAngle(back, RIGHT, car_pitch(c));
 		back = Vector3RotateByAxisAngle(back, UP, c->yaw);
-		cam_pos = Vector3Add(cam_pos, back);
-		cam_pos.y = t_height(cam_pos.x, cam_pos.z) + 2.f;
-		look_at(cam_pos, XYZ(c->x, t_height(c->x, c->z) + 0.6, c->z));
+		cam_pos = Vector3Add(car_pos(c), back);
+
+		Vector3 dir = XYZ(0.f, 0.f, 1.f);
+		dir = Vector3RotateByAxisAngle(dir, RIGHT, car_pitch(c));
+		dir = Vector3RotateByAxisAngle(dir, UP, c->yaw);
+
+		look_dir(cam_pos, dir);
+		look_up(Vector3RotateByAxisAngle(UP, FORWARD, car_roll(c)));
 	} else {
-		look_at(cam_pos, XYZ(-1, -1, -1));
+		look_dir(cam_pos, XYZ(-1, -1, -1));
+		look_up(UP);
 	}
 
 	t_update();

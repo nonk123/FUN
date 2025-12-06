@@ -52,7 +52,7 @@ Car* spawn_car(float x, float z) {
 		if (cars[idx])
 			continue;
 		cars[idx] = MemAlloc(sizeof(Car));
-		cars[idx]->id = idx + 1, cars[idx]->x = x, cars[idx]->z = z;
+		cars[idx]->id = idx + 1, cars[idx]->pos = Vector2Zero();
 		cars[idx]->yaw = 0.f, cars[idx]->linvel = XY(0, 0), cars[idx]->torque = 0.f;
 		cars[idx]->models[CARMODEL_HULL] = car_model;
 		for (int j = 0; j < 4; j++)
@@ -64,10 +64,31 @@ Car* spawn_car(float x, float z) {
 	return NULL;
 }
 
-static float car_angle_at(const Car* car, Vector2 dist, float step) {
+static Matrix car_mat(const Car* car) {
+	const Matrix transl = MatrixTranslate(car->pos.x, t_height(car->pos.x, car->pos.y) + WHEEL_RADIUS, car->pos.y),
+		     scale = MatrixScale(1.f, 1.f, 1.f), roty = MatrixRotateY(car->yaw),
+		     rotx = MatrixRotateX(car_pitch(car)), rotz = MatrixRotateZ(car_roll(car)),
+		     rotations = MatrixMultiply(MatrixMultiply(MatrixMultiply(scale, rotz), rotx), roty);
+	return MatrixMultiply(rotations, transl);
+}
+
+static float wheel_grip(const Car* car, Vector2 offset) {
+	const Matrix mat = car_mat(car);
+	offset = Vector2Multiply(offset, WHEEL_DISTANCE);
+	const Vector3 absolute = Vector3Transform(XYZ(offset.x, 0.f, offset.y), mat);
+	const float diff = fabsf(t_height(absolute.x, absolute.z) - absolute.y);
+	if (diff > WHEEL_RADIUS)
+		return 0.f;
+	else if (diff < 0.5f * WHEEL_RADIUS)
+		return 1.f;
+	else
+		return diff / WHEEL_RADIUS;
+}
+
+static float angle_at_wheel(const Car* car, Vector2 dist, float step) {
 	dist = Vector2Rotate(Vector2Multiply(dist, WHEEL_DISTANCE), car->yaw);
-	const Vector2 pos = XY(car->x, car->z), end = Vector2Add(pos, dist);
-	return atanf((t_height(end.x, end.y) - t_height(pos.x, pos.y)) / step);
+	const Vector2 end = Vector2Add(car->pos, dist);
+	return atanf((t_height(end.x, end.y) - t_height(car->pos.x, car->pos.y)) / step);
 }
 
 static float ang_avg(float angs[4], int count) {
@@ -77,44 +98,49 @@ static float ang_avg(float angs[4], int count) {
 	return atanf(y / x);
 }
 
-static float ang_avg4(float angs[4]) {
-	return ang_avg(angs, 4);
+Vector3 car_pos(const Car* car) {
+	return XYZ(car->pos.x, t_height(car->pos.x, car->pos.y), car->pos.y);
 }
 
 float car_pitch(const Car* car) {
-	const float fl = car_angle_at(car, XY(-1, 1), WHEEL_DISTANCE.y),
-		    fr = car_angle_at(car, XY(1, 1), WHEEL_DISTANCE.y),
-		    bl = car_angle_at(car, XY(-1, -1), -WHEEL_DISTANCE.y),
-		    br = car_angle_at(car, XY(1, -1), -WHEEL_DISTANCE.y);
-	return ang_avg4((float[4]){fl, fr, bl, br});
+	const float fl = angle_at_wheel(car, XY(-1, 1), WHEEL_DISTANCE.y),
+		    fr = angle_at_wheel(car, XY(1, 1), WHEEL_DISTANCE.y),
+		    bl = angle_at_wheel(car, XY(-1, -1), -WHEEL_DISTANCE.y),
+		    br = angle_at_wheel(car, XY(1, -1), -WHEEL_DISTANCE.y);
+	return -ang_avg((float[4]){fl, fr, bl, br}, 4);
 }
 
 float car_roll(const Car* car) {
-	const float fl = car_angle_at(car, XY(-1, 1), -WHEEL_DISTANCE.x),
-		    fr = car_angle_at(car, XY(1, 1), WHEEL_DISTANCE.x),
-		    bl = car_angle_at(car, XY(-1, -1), -WHEEL_DISTANCE.x),
-		    br = car_angle_at(car, XY(1, -1), WHEEL_DISTANCE.x);
-	return ang_avg4((float[4]){fl, fr, bl, br});
+	const float fl = angle_at_wheel(car, XY(-1, 1), -WHEEL_DISTANCE.x),
+		    fr = angle_at_wheel(car, XY(1, 1), WHEEL_DISTANCE.x),
+		    bl = angle_at_wheel(car, XY(-1, -1), -WHEEL_DISTANCE.x),
+		    br = angle_at_wheel(car, XY(1, -1), WHEEL_DISTANCE.x);
+	return ang_avg((float[4]){fl, fr, bl, br}, 4);
 }
+
+static const Vector2 wheel_offs[4] = {XY(-1, 1), XY(1, 1), XY(-1, -1), XY(1, -1)};
 
 void car_control(Car* car, Vector2 dir) {
 	// BIG TODO.
 	const float speed = 10.f / TICKRATE;
 	const Vector2 thrust = Vector2Scale(Vector2Rotate(XY(0, -dir.y), car->yaw), speed);
-	car->x += thrust.x, car->z += thrust.y;
+	for (int i = 0; i < 4; i++) {
+		car->linvel = Vector2Zero();
+		car->torque += 0.f;
+	}
+}
+
+void car_update(Car* car) {
+	car->pos = Vector2Add(car->pos, Vector2Scale(car->linvel, 1.f / TICKRATE));
+	car->yaw += car->torque / TICKRATE;
 }
 
 void car_draw(const Car* car) {
-	const Matrix transl = MatrixTranslate(car->x, t_height(car->x, car->z) + WHEEL_RADIUS, car->z),
-		     scale = MatrixScale(1.f, 1.f, 1.f), roty = MatrixRotateY(car->yaw),
-		     rotx = MatrixRotateX(-car_pitch(car)), rotz = MatrixRotateZ(car_roll(car)),
-		     rotations = MatrixMultiply(MatrixMultiply(MatrixMultiply(scale, rotz), rotx), roty),
-		     car_transform = MatrixMultiply(rotations, transl);
+	const Matrix car_transform = car_mat(car);
 	DrawModelPro(car->models[CARMODEL_HULL], car_transform, WHITE);
 
-	const Vector2 offs[4] = {XY(-1, 1), XY(1, 1), XY(-1, -1), XY(1, -1)};
 	for (int i = 0; i < 4; i++) {
-		const float x = offs[i].x * WHEEL_DISTANCE.x, z = offs[i].y * WHEEL_DISTANCE.y;
+		const float x = wheel_offs[i].x * WHEEL_DISTANCE.x, z = wheel_offs[i].y * WHEEL_DISTANCE.y;
 		const Matrix transform = MatrixMultiply(MatrixTranslate(x, 0.f, z), car_transform);
 		DrawModelPro(car->models[CARMODEL_WHEELS + i], transform, WHITE);
 	}

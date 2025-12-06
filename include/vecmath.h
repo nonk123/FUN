@@ -10,4 +10,4 @@
 
 #define UP XYZ(0, 1, 0)
 #define FORWARD XYZ(0, 0, 1)
-#define RIGHT XYZ(1, 0, 0);
+#define RIGHT XYZ(1, 0, 0)

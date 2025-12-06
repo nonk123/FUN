@@ -19,3 +19,7 @@ void look_at(Vector3 from, Vector3 to) {
 void look_dir(Vector3 from, Vector3 dir) {
 	look_at(from, Vector3Add(from, dir));
 }
+
+void look_up(Vector3 up) {
+	camera.up = up;
+}
