@@ -67,21 +67,25 @@ Car* spawn_car(float x, float z) {
 static float car_angle_at(const Car* car, Vector2 dist, float step) {
 	dist = Vector2Rotate(Vector2Multiply(dist, WHEEL_DISTANCE), car->yaw);
 	const Vector2 pos = XY(car->x, car->z), end = Vector2Add(pos, dist);
-	return atan2f(-step, (t_height(end.x, end.y) - t_height(pos.x, pos.y)));
+	return atanf((t_height(end.x, end.y) - t_height(pos.x, pos.y)) / step);
+}
+
+static float ang_avg(float angs[4], int count) {
+	float x = 0.f, y = 0.f;
+	for (int i = 0; i < count; i++)
+		x += cosf(angs[i]), y += sinf(angs[i]);
+	return atanf(y / x);
 }
 
 static float ang_avg4(float angs[4]) {
-	float x = 0.f, y = 0.f;
-	for (int i = 0; i < 4; i++)
-		x += cosf(angs[i]), y += sinf(angs[i]);
-	return atan2f(y / 4.f, x / 4.f);
+	return ang_avg(angs, 4);
 }
 
 float car_pitch(const Car* car) {
-	const float fl = car_angle_at(car, XY(-1, 1), -WHEEL_DISTANCE.y),
-		    fr = car_angle_at(car, XY(1, 1), -WHEEL_DISTANCE.y),
-		    bl = car_angle_at(car, XY(-1, -1), WHEEL_DISTANCE.y),
-		    br = car_angle_at(car, XY(1, -1), WHEEL_DISTANCE.y);
+	const float fl = car_angle_at(car, XY(-1, 1), WHEEL_DISTANCE.y),
+		    fr = car_angle_at(car, XY(1, 1), WHEEL_DISTANCE.y),
+		    bl = car_angle_at(car, XY(-1, -1), -WHEEL_DISTANCE.y),
+		    br = car_angle_at(car, XY(1, -1), -WHEEL_DISTANCE.y);
 	return ang_avg4((float[4]){fl, fr, bl, br});
 }
 
@@ -103,7 +107,7 @@ void car_control(Car* car, Vector2 dir) {
 void car_draw(const Car* car) {
 	const Matrix transl = MatrixTranslate(car->x, t_height(car->x, car->z) + WHEEL_RADIUS, car->z),
 		     scale = MatrixScale(1.f, 1.f, 1.f), roty = MatrixRotateY(car->yaw),
-		     rotx = MatrixRotateX(car_pitch(car)), rotz = MatrixRotateZ(car_roll(car)),
+		     rotx = MatrixRotateX(-car_pitch(car)), rotz = MatrixRotateZ(car_roll(car)),
 		     rotations = MatrixMultiply(MatrixMultiply(MatrixMultiply(scale, rotz), rotx), roty),
 		     car_transform = MatrixMultiply(rotations, transl);
 	DrawModelPro(car->models[CARMODEL_HULL], car_transform, WHITE);
