@@ -18,9 +18,11 @@ static const char *vsh =
 #include "shaders/base.fsh"
 	;
 
-Material make_material() {
-	Material material = LoadMaterialDefault();
-	material.shader = shader;
+Material* make_material() {
+	Material* material = MemAlloc(sizeof(*material));
+	material->maps = MemAlloc(sizeof(*material->maps));
+	material->maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+	material->shader = shader;
 	return material;
 }
 

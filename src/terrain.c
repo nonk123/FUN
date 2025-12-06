@@ -147,9 +147,8 @@ static void generate_chunk(float x, float z) {
 	c->model.materialCount = 1;
 	c->model.materials = MemAlloc(sizeof(Material) * c->model.materialCount);
 
-	Material material = make_material();
-	material.maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
-	c->model.materials[0] = material;
+	c->model.materials = make_material();
+	c->model.materials->maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
 
 	c->model.meshMaterial = MemAlloc(sizeof(int));
 	c->model.meshMaterial[0] = 0;

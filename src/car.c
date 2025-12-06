@@ -7,18 +7,22 @@
 #include "car.h"
 #include "log.h"
 #include "raylibext.h"
+#include "shader.h"
 #include "terrain.h"
 #include "vecmath.h"
 
 static Car* cars[MAX_CARS] = {0};
 
 static Model model = {0};
+static Material materials = {0};
 static Texture2D palette = {0};
 
 void car_init() {
 	model = LoadModel(ASSETS "/car.obj");
 	palette = LoadTexture(ASSETS "/palette.png");
-	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = palette;
+
+	model.materialCount = 1, model.materials = make_material();
+	model.materials->maps[MATERIAL_MAP_DIFFUSE].texture = palette;
 }
 
 void car_teardown() {
