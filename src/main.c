@@ -22,9 +22,7 @@ static void realmain() {
 
 	restart();
 
-	const double tick_delay = 1.0 / TICKRATE;
 	double last_time = GetTime(), ticks = 0.0;
-
 	while (!WindowShouldClose()) {
 		const double cur_time = GetTime();
 		ticks += (cur_time - last_time) * TICKRATE;
