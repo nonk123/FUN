@@ -48,16 +48,22 @@ void car_teardown() {
 }
 
 Car* spawn_car(float x, float z) {
+	static const Vector2 wheel_offs[4] = {XY(-1, 1), XY(1, 1), XY(-1, -1), XY(1, -1)};
+
 	for (int idx = 0; idx < MAX_CARS; idx++) {
 		if (cars[idx])
 			continue;
-		cars[idx] = MemAlloc(sizeof(Car));
-		cars[idx]->id = idx + 1, cars[idx]->pos = Vector2Zero();
-		cars[idx]->yaw = 0.f, cars[idx]->linvel = XY(0, 0), cars[idx]->torque = 0.f;
-		cars[idx]->models[CARMODEL_HULL] = car_model;
-		for (int j = 0; j < 4; j++)
-			cars[idx]->models[CARMODEL_WHEELS + j] = wheel_model;
-		return cars[idx];
+		Car* car = cars[idx] = MemAlloc(sizeof(Car));
+		car->id = idx + 1, car->pos = Vector2Zero();
+		car->yaw = 0.f, car->linvel = XY(0, 0), car->angvel = 0.f;
+		car->model = car_model;
+		for (int j = 0; j < 4; j++) {
+			Wheel* w = &car->wheels[j];
+			w->model = wheel_model, w->angle = 0.f, w->offset = wheel_offs[j];
+			w->distance = Vector2Multiply(w->offset, WHEEL_DISTANCE);
+			w->angvel = 0.f;
+		}
+		return car;
 	}
 
 	warn("SHIT RNA OUT OF CARS EXPLODING!!!");
@@ -118,31 +124,46 @@ float car_roll(const Car* car) {
 	return ang_avg((float[4]){fl, fr, bl, br}, 4);
 }
 
-static const Vector2 wheel_offs[4] = {XY(-1, 1), XY(1, 1), XY(-1, -1), XY(1, -1)};
-
-void car_control(Car* car, Vector2 dir) {
-	// BIG TODO.
-	const float speed = 10.f / TICKRATE;
-	const Vector2 thrust = Vector2Scale(Vector2Rotate(XY(0, -dir.y), car->yaw), speed);
+// extern in `game.c`.
+void car_thrust(Car* car, float dir) {
 	for (int i = 0; i < 4; i++) {
-		car->linvel = Vector2Zero();
-		car->torque += 0.f;
+		Wheel* wheel = &car->wheels[i];
+		wheel->angvel += dir * 2.f / TICKRATE;
 	}
 }
 
+// extern in `game.c`.
+void car_steer(Car* car, float dir) {
+	const float angle = dir * 20.f * DEG2RAD;
+	car->wheels[0].angle = car->wheels[1].angle = angle;
+}
+
 void car_update(Car* car) {
+	for (int i = 0; i < 4; i++) {
+		Wheel* wheel = &car->wheels[i];
+		const float grip = wheel_grip(car, wheel->offset), thrust = wheel->angvel / WHEEL_RADIUS;
+
+		const float radius = Vector2Length(wheel->distance);
+		car->angvel += thrust * radius * grip * sinf(wheel->angle) / TICKRATE;
+
+		const Vector2 acceleration = Vector2Rotate(XY(0.f, thrust), car->yaw + wheel->angle);
+		car->linvel = Vector2Add(car->linvel, Vector2Scale(acceleration, grip));
+
+		wheel->angle = 0.f; // reset the angle after steering (for now...)
+	}
+
+	car->yaw += car->angvel / TICKRATE;
 	car->pos = Vector2Add(car->pos, Vector2Scale(car->linvel, 1.f / TICKRATE));
-	car->yaw += car->torque / TICKRATE;
 }
 
 void car_draw(const Car* car) {
 	const Matrix car_transform = car_mat(car);
-	DrawModelPro(car->models[CARMODEL_HULL], car_transform, WHITE);
+	DrawModelPro(car->model, car_transform, WHITE);
 
 	for (int i = 0; i < 4; i++) {
-		const float x = wheel_offs[i].x * WHEEL_DISTANCE.x, z = wheel_offs[i].y * WHEEL_DISTANCE.y;
-		const Matrix transform = MatrixMultiply(MatrixTranslate(x, 0.f, z), car_transform);
-		DrawModelPro(car->models[CARMODEL_WHEELS + i], transform, WHITE);
+		const Vector2 dist = car->wheels[i].distance;
+		const Matrix transform = MatrixMultiply(MatrixTranslate(dist.x, 0.f, dist.y), car_transform);
+		DrawModelPro(car->wheels[i].model, transform, WHITE);
 	}
 }
 

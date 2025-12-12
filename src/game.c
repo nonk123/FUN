@@ -50,12 +50,17 @@ void game_update() {
 		Car* car = NULL;
 		if (!(car = get_car(id)))
 			continue;
+
 		if (id == player_car) {
-			Vector2 dir = {0};
-			dir.x = (float)(IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
-			dir.y = (float)(IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
-			car_control(car, dir);
+			extern void car_thrust(Car*, float);
+			car_thrust(car, (float)(IsKeyDown(KEY_W) - IsKeyDown(KEY_S)));
+
+			extern void car_steer(Car*, float);
+			car_steer(car, (float)(IsKeyDown(KEY_D) - IsKeyDown(KEY_A)));
 		}
+
+		extern void car_update(Car*);
+		car_update(car);
 	}
 }
 
