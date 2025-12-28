@@ -51,8 +51,13 @@ static void kill_terrain() {
 }
 
 void reset_terrain() { // used in `game.c`
-	kill_terrain();
-	open_simplex_noise(time(NULL), &osn);
+	static int64_t last_seed = 0;
+	const int64_t new_seed = time(NULL);
+	if (new_seed != last_seed) {
+		last_seed = new_seed;
+		kill_terrain();
+		open_simplex_noise(new_seed, &osn);
+	}
 }
 
 void t_init() {

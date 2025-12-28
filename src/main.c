@@ -27,7 +27,7 @@ static void realmain() {
 		ticks += (cur_time - last_time) * TICKRATE;
 		last_time = cur_time;
 
-		if (IsKeyPressed(KEY_R))
+		if (IsKeyDown(KEY_R))
 			restart(), ticks += 1.f;
 
 		while (ticks >= 1.f)
