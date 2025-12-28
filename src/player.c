@@ -25,7 +25,7 @@ static float fsign(float x) {
 }
 
 static void setabs(float* out, float abs) {
-	*out = (float)(abs <= EPSILON) * fsign(*out) * abs;
+	*out = (float)(abs >= EPSILON) * fsign(*out) * fabsf(abs);
 }
 
 void player_update() {
@@ -64,8 +64,8 @@ void player_update() {
 		if (IsKeyPressed(KEY_SPACE))
 			player.linvel.y += JUMP_IMPULSE;
 		else {
-			setabs(&player.linvel.x, player.linvel.x - friction);
-			setabs(&player.linvel.z, player.linvel.z - friction);
+			setabs(&player.linvel.x, fabsf(player.linvel.x) - friction);
+			setabs(&player.linvel.z, fabsf(player.linvel.z) - friction);
 		}
 	}
 
