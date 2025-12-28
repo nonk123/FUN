@@ -28,10 +28,10 @@ static void setabs(float* out, float abs) {
 }
 
 void player_update() {
-	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+	{
 		const Vector2 dpos = GetMouseDelta();
 		player.camera_pitch -= dpos.y * MOUSE_SENSITIVITY * GetFrameTime();
-		player.camera_yaw += dpos.x * MOUSE_SENSITIVITY * GetFrameTime();
+		player.camera_yaw -= dpos.x * MOUSE_SENSITIVITY * GetFrameTime();
 	}
 
 	player.camera_yaw = fmodf(player.camera_yaw, PI * 2.f);
