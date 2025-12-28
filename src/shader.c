@@ -10,31 +10,49 @@ static const char* VARS[] = {
 	[SHV_UV_SCALE] = "uv_scale",
 };
 
-static Shader shader = {0};
+Shader shaders[SHT_COUNT] = {0};
 
-static const char *vsh =
+static const char *base_vsh =
 #include "shaders/base.vsh"
-	, *fsh =
+	, *base_fsh =
 #include "shaders/base.fsh"
+		  , *skydome_fsh =
+#include "shaders/skydome.fsh"
 	;
 
-Material* make_material() {
+Material* make_materials() {
 	Material* material = MemAlloc(sizeof(*material));
 	material->maps = MemAlloc(sizeof(*material->maps));
 	material->maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-	material->shader = shader;
+	material->shader = shaders[SHT_BASIC];
 	return material;
 }
 
+static void sh_load(ShaderType type) {}
+
 void sh_init() {
-	shader = LoadShaderFromMemory(vsh, fsh);
-	expect(shader.id, "Failed to load shader");
+	const char* sources[SHT_COUNT][2] = {
+		[SHT_BASIC] = {base_vsh, base_fsh   },
+		[SHT_SKYDOME] = {base_vsh, skydome_fsh},
+	};
 
-	shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader, "mvp");
-	shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shader, "m_model");
+	for (int i = 0; i < SHT_COUNT; i++) {
+		const char *vsh = sources[i][0], *fsh = sources[i][1];
 
-	const int zero = 0;
-	sh_set(SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);
+		shaders[i] = LoadShaderFromMemory(vsh, fsh);
+		expect(shaders[i].id, "Failed to load shader %d", i);
+
+		shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
+		shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
+
+		const int zero = 0;
+		sh_set(SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);
+	}
+}
+
+void sh_teardown() {
+	for (int i = 0; i < SHT_COUNT; i++)
+		UnloadShader(shaders[i]);
 }
 
 void sh_set(ShaderValue idx, const void* value, int type) {
@@ -48,17 +66,5 @@ void sh_set_v(ShaderValue idx, const void* value, int type, int count) {
 }
 
 void sh_set_raw(const char* name, const void* value, int type, int count) {
-	SetShaderValueV(shader, GetShaderLocation(shader, name), value, type, count);
-}
-
-void sh_teardown() {
-	UnloadShader(shader);
-}
-
-void sh_begin() {
-	BeginShaderMode(shader);
-}
-
-void sh_end() {
-	EndShaderMode();
+	SetShaderValueV(shaders[SHT_BASIC], GetShaderLocation(shaders[SHT_BASIC], name), value, type, count);
 }

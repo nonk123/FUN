@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "terrain.h"
 
-void restart() {
+void game_restart() {
 	t_restart();
 	player_restart();
 }

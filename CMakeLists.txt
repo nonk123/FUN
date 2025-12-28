@@ -40,6 +40,7 @@ endfunction()
 
 embed_txt(shaders/base.vsh)
 embed_txt(shaders/base.fsh)
+embed_txt(shaders/skydome.fsh)
 
 add_executable(fun ${SOURCES} ${HEADERS})
 target_link_libraries(fun PRIVATE raylib noise)

@@ -19,3 +19,7 @@ void DrawModelPro(Model model, Matrix transform, Color tint) {
 		model.materials[model.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color = color;
 	}
 }
+
+void ClearTransparent() {
+	ClearBackground((Color){0, 0, 0, 0});
+}
