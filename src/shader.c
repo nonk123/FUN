@@ -7,7 +7,6 @@ static const char* VARS[] = {
 	[SHV_TEXTURE] = "texture0",
 	[SHV_AMBIENT] = "ambient",
 	[SHV_LIGHT_COUNT] = "light_count",
-	[SHV_UV_SCALE] = "uv_scale",
 };
 
 Shader shaders[SHT_COUNT] = {0};

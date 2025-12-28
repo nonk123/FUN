@@ -10,6 +10,9 @@
 #include "terrain.h"
 #include "vecmath.h"
 
+/// Can't explain this one. Don't ask.
+#define UV_SCALE (3.f)
+
 /// Points per side of a chunk.
 #define RESOLUTION (16)
 
@@ -131,14 +134,15 @@ static bool chunk_exists(float wx, float wz) {
 	return false;
 }
 
-static void generate_vert(const Chunk* c, size_t idx, int64_t x, int64_t z) {
+static void generate_vert(const Chunk* c, size_t idx, int64_t offx, int64_t offz) {
 	Vector3 *vertices = (Vector3*)c->model.meshes->vertices, *norms = (Vector3*)c->model.meshes->normals;
 	Vector2* texcoords = (Vector2*)c->model.meshes->texcoords;
 	Color* colors = (Color*)c->model.meshes->colors;
 
-	vertices[idx] = XYZ((float)x / RESOLUTION * SIDE, t_height(c_x(c, x), c_z(c, z)), (float)z / RESOLUTION * SIDE);
-	texcoords[idx] = XY((float)x / RESOLUTION, (float)z / RESOLUTION);
-	norms[idx] = t_norm(c_x(c, x), c_z(c, z));
+	const float x01 = (float)offx / RESOLUTION, z01 = (float)offz / RESOLUTION;
+	vertices[idx] = XYZ(x01 * SIDE, t_height(c_x(c, offx), c_z(c, offz)), z01 * SIDE);
+	norms[idx] = t_norm(c_x(c, offx), c_z(c, offz));
+	texcoords[idx] = XY(fmodf((c->x + x01) / UV_SCALE, UV_SCALE), fmodf((c->z + z01) / UV_SCALE, UV_SCALE));
 	colors[idx] = WHITE;
 }
 
