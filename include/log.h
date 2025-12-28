@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include <raylib.h>
 
 void log_init();
 __attribute__((noreturn)) void log_die();
