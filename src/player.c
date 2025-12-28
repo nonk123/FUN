@@ -27,6 +27,12 @@ void player_update() {
 		player.camera_yaw += dpos.x * MOUSE_SENSITIVITY * GetFrameTime();
 	}
 
+	player.camera_yaw = fmodf(player.camera_yaw, PI * 2.f);
+	{
+		const float max = PI * 0.4;
+		player.camera_pitch = Clamp(player.camera_pitch, -max, max);
+	}
+
 	look_dir(Vector3Add(player.feet, Vector3Scale(UP, PLAYER_HEIGHT * 0.7f)),
 		Vector3RotateByAxisAngle(
 			Vector3RotateByAxisAngle(FORWARD, RIGHT, player.camera_pitch), UP, player.camera_yaw));
