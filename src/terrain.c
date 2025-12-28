@@ -57,6 +57,7 @@ void reset_terrain() { // used in `game.c`
 		last_seed = new_seed;
 		kill_terrain();
 		open_simplex_noise(new_seed, &osn);
+		t_update();
 	}
 }
 
