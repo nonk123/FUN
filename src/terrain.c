@@ -50,14 +50,14 @@ static void kill_terrain() {
 	}
 }
 
-void reset_terrain() { // used in `main.c`
+void reset_terrain() { // used in `game.c`
 	kill_terrain();
 	open_simplex_noise(time(NULL), &osn);
 }
 
 void t_init() {
 	reset_terrain();
-	green_grass = LoadTexture(ASSETS "/green-grass.png");
+	green_grass = LoadTexture(ASSETS "/Grass_A_BaseColor.png");
 }
 
 void t_teardown() {
@@ -72,14 +72,14 @@ static Vector2 chunk_center(const Chunk* ch) {
 	return c;
 }
 
-static float pos_noise(float x, float z, int octave) {
+static float noise_at(float x, float z, int octave) {
 	const float octaves[2] = {1.f, OCTAVE}, scale = octaves[octave] * SCALE;
 	x /= scale, z /= scale;
 	return 1.f + 0.5f * open_simplex_noise2(osn, x, z);
 }
 
 float t_height(float x, float z) {
-	return (pos_noise(x, z, 0) * pos_noise(x, z, 1) - 1.f) * STEEPNESS;
+	return (noise_at(x, z, 0) * noise_at(x, z, 1) - 1.f) * STEEPNESS;
 }
 
 static float c_x(const Chunk* c, int64_t x) {
@@ -133,6 +133,17 @@ static bool chunk_exists(float wx, float wz) {
 	return false;
 }
 
+static void generate_vert(const Chunk* c, size_t idx, int64_t x, int64_t z) {
+	Vector3 *vertices = (Vector3*)c->model.meshes->vertices, *norms = (Vector3*)c->model.meshes->normals;
+	Vector2* texcoords = (Vector2*)c->model.meshes->texcoords;
+	Color* colors = (Color*)c->model.meshes->colors;
+
+	vertices[idx] = XYZ((float)x / RESOLUTION * SIDE, c_height(c, x, z), (float)z / RESOLUTION * SIDE);
+	texcoords[idx] = XY((float)x / RESOLUTION, (float)z / RESOLUTION);
+	norms[idx] = c_norm(c, x, z);
+	colors[idx] = WHITE;
+}
+
 static void generate_chunk(float x, float z) {
 	Chunk* c = MemAlloc(sizeof(*c));
 	c->next = root, root = c;
@@ -151,7 +162,7 @@ static void generate_chunk(float x, float z) {
 	c->model.materials->maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
 
 	c->model.meshMaterial = MemAlloc(sizeof(int));
-	c->model.meshMaterial[0] = 0;
+	*c->model.meshMaterial = 0;
 
 	mesh->triangleCount = 2 * RESOLUTION * RESOLUTION;
 	mesh->vertexCount = 3 * mesh->triangleCount;
@@ -161,38 +172,19 @@ static void generate_chunk(float x, float z) {
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
-#define Vert(d, _x, _z)                                                                                                \
-	do {                                                                                                           \
-		const size_t _i = i + (d);                                                                             \
-		vertices[_i] = XYZ(                                                                                    \
-			(float)(_x) / RESOLUTION * SIDE, c_height(c, (_x), (_z)), (float)(_z) / RESOLUTION * SIDE);    \
-		norms[_i] = c_norm(c, (_x), (_z));                                                                     \
-		texcoords[_i] = XY((float)(_x) / RESOLUTION, (float)(_z) / RESOLUTION);                                \
-		colors[_i] = WHITE;                                                                                    \
-	} while (0)
-
-	Vector3 *vertices = (Vector3*)mesh->vertices, *norms = (Vector3*)mesh->normals;
-	Vector2* texcoords = (Vector2*)mesh->texcoords;
-	Color* colors = (Color*)mesh->colors;
-
 	size_t i = 0;
-
 	for (int z = 0; z < RESOLUTION; z++)
 		for (int x = 0; x < RESOLUTION; x++) {
-			Vert(0, x, z);
-			Vert(1, x + 1, z + 1);
-			Vert(2, x + 1, z);
+			generate_vert(c, i++, x, z);
+			generate_vert(c, i++, x + 1, z + 1);
+			generate_vert(c, i++, x + 1, z);
 
-			Vert(3, x, z);
-			Vert(4, x, z + 1);
-			Vert(5, x + 1, z + 1);
-
-			i += 6;
+			generate_vert(c, i++, x, z);
+			generate_vert(c, i++, x, z + 1);
+			generate_vert(c, i++, x + 1, z + 1);
 		}
 
 	UploadMesh(mesh, false);
-
-#undef Vert
 }
 
 static int64_t i64abs(int64_t x) {

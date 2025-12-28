@@ -2,7 +2,6 @@
 
 #include <raylib.h>
 
-#include "car.h"
 #include "game.h"
 #include "light.h"
 #include "log.h"
@@ -18,7 +17,7 @@ static void realmain() {
 	InitWindow(800, 600, "FUN."), InitAudioDevice();
 
 	SetExitKey(KEY_BACKSPACE);
-	sh_init(), t_init(), car_init();
+	sh_init(), t_init();
 
 	restart();
 
@@ -59,7 +58,7 @@ static void realmain() {
 		EndDrawing();
 	}
 
-	car_teardown(), t_teardown(), sh_teardown();
+	t_teardown(), sh_teardown();
 	CloseAudioDevice(), CloseWindow();
 }
 
