@@ -12,7 +12,7 @@ Camera3D camera = {0}; // `extern` in `main.c`, `terrain.c`
 
 void look_at(Vector3 from, Vector3 to) {
 	camera.projection = CAMERA_PERSPECTIVE;
-	camera.fovy = 40.f, camera.up = UP;
+	camera.fovy = 90.f, camera.up = UP;
 	camera.position = from, camera.target = to;
 }
 
