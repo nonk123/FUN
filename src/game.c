@@ -16,7 +16,7 @@ void game_update() {
 }
 
 void game_draw() {
-	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.2f), SHADER_UNIFORM_VEC4);
+	sh_set(SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.5f), SHADER_UNIFORM_VEC4);
 	player_draw();
 	t_draw();
 }
