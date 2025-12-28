@@ -50,7 +50,7 @@ static void kill_terrain() {
 	}
 }
 
-void reset_terrain() { // used in `game.c`
+void t_restart() { // used in `game.c`
 	static int64_t last_seed = 0;
 	const int64_t new_seed = time(NULL);
 	if (new_seed != last_seed) {
@@ -62,7 +62,7 @@ void reset_terrain() { // used in `game.c`
 }
 
 void t_init() {
-	reset_terrain();
+	t_restart();
 	green_grass = LoadTexture(ASSETS "/Grass_A_BaseColor.png");
 }
 
