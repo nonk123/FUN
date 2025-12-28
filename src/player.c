@@ -5,7 +5,7 @@
 #include "player.h"
 #include "terrain.h"
 
-#define MOUSE_SENSITIVITY (4.f / 96.f)
+#define MOUSE_SENSITIVITY (9.f / 96.f)
 
 static struct {
 	Vector3 feet;
