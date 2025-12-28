@@ -20,11 +20,12 @@ void player_restart() {
 	player.camera_pitch = player.camera_yaw = 0.f;
 }
 
+static float fsign(float x) {
+	return x < 0.f ? -1.f : 1.f;
+}
+
 static void setabs(float* out, float abs) {
-	if (abs > EPSILON)
-		*out = (*out < 0 ? -1.f : 1.f) * abs;
-	else
-		*out = 0.f;
+	*out = (float)(abs <= EPSILON) * fsign(*out) * abs;
 }
 
 void player_update() {
