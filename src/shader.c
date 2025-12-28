@@ -28,8 +28,6 @@ Material* make_materials() {
 	return material;
 }
 
-static void sh_load(ShaderType type) {}
-
 void sh_init() {
 	const char* sources[SHT_COUNT][2] = {
 		[SHT_BASIC] = {base_vsh, base_fsh   },
