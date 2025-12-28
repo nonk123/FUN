@@ -38,8 +38,10 @@ function(embed_txt FILENAME)
     file(WRITE ${GENERATED}/${FILENAME} "R\"(${CONTENTS})\"")
 endfunction()
 
-embed_txt(shaders/base.vsh)
-embed_txt(shaders/base.fsh)
+embed_txt(shaders/leet.vsh)
+embed_txt(shaders/leet.fsh)
+
+embed_txt(shaders/skydome.vsh)
 embed_txt(shaders/skydome.fsh)
 
 add_executable(fun ${SOURCES} ${HEADERS})

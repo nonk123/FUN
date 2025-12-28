@@ -9,29 +9,35 @@ static const char* VARS[] = {
 	[SHV_LIGHT_COUNT] = "light_count",
 };
 
-Shader shaders[SHT_COUNT] = {0};
+Shader shaders[SHT_COUNT] = {0}; // extern in `skydome.c`
 
-static const char *base_vsh =
-#include "shaders/base.vsh"
-	, *base_fsh =
-#include "shaders/base.fsh"
-		  , *skydome_fsh =
+// clang-format off
+static const char *leet_vsh =
+#include "shaders/leet.vsh"
+	, *leet_fsh =
+#include "shaders/leet.fsh"
+	, *skydome_vsh =
+#include "shaders/skydome.vsh"
+	, *skydome_fsh =
 #include "shaders/skydome.fsh"
 	;
+// clang-format on
 
-Material* make_materials() {
+Material* make_leet_materials() {
 	Material* material = MemAlloc(sizeof(*material));
 	material->maps = MemAlloc(sizeof(*material->maps));
 	material->maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-	material->shader = shaders[SHT_BASIC];
+	material->shader = shaders[SHT_LEET];
 	return material;
 }
 
 void sh_init() {
+	// clang-format off
 	const char* sources[SHT_COUNT][2] = {
-		[SHT_BASIC] = {base_vsh, base_fsh   },
-		[SHT_SKYDOME] = {base_vsh, skydome_fsh},
+		[SHT_LEET] = {leet_vsh, leet_fsh},
+		[SHT_SKYDOME] = {skydome_vsh, skydome_fsh},
 	};
+	// clang-format on
 
 	for (int i = 0; i < SHT_COUNT; i++) {
 		const char *vsh = sources[i][0], *fsh = sources[i][1];
@@ -39,12 +45,14 @@ void sh_init() {
 		shaders[i] = LoadShaderFromMemory(vsh, fsh);
 		expect(shaders[i].id, "Failed to load shader %d", i);
 
+		if (vsh != leet_vsh)
+			continue;
 		shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
 		shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
-
-		const int zero = 0;
-		sh_set(SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);
 	}
+
+	const int zero = 0;
+	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);
 }
 
 void sh_teardown() {
@@ -52,16 +60,12 @@ void sh_teardown() {
 		UnloadShader(shaders[i]);
 }
 
-void sh_set(ShaderValue idx, const void* value, int type) {
-	sh_set_v(idx, value, type, 1);
-}
-
-void sh_set_v(ShaderValue idx, const void* value, int type, int count) {
+void sh_set(ShaderType shader, ShaderValue idx, const void* value, int type) {
 	const char* var = VARS[idx];
-	expect(var, "Unspecified shader-var: %d", idx);
-	sh_set_raw(var, value, type, count);
+	expect(var, "Undefined shader-var: %d", idx);
+	sh_set_raw(shader, var, value, type);
 }
 
-void sh_set_raw(const char* name, const void* value, int type, int count) {
-	SetShaderValueV(shaders[SHT_BASIC], GetShaderLocation(shaders[SHT_BASIC], name), value, type, count);
+void sh_set_raw(ShaderType shader, const char* name, const void* value, int type) {
+	SetShaderValueV(shaders[shader], GetShaderLocation(shaders[shader], name), value, type, 1);
 }

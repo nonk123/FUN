@@ -19,12 +19,12 @@ void light_reset() {
 }
 
 static void light_set(int idx, const char* field, const void* value, int type) {
-	sh_set_raw(TextFormat("lights[%d].%s", idx, field), value, type, 1);
+	sh_set_raw(SHT_LEET, TextFormat("lights[%d].%s", idx, field), value, type);
 }
 
 void light_done() {
 	check_light_count();
-	sh_set(SHV_LIGHT_COUNT, &light_count, SHADER_UNIFORM_INT);
+	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &light_count, SHADER_UNIFORM_INT);
 
 	for (int i = 0; i < MAX_LIGHTS; i++) {
 		light_set(i, "type", &lights[i].type, SHADER_UNIFORM_INT);

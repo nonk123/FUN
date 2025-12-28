@@ -6,7 +6,7 @@
 #define RGB(r, g, b) RGBA(r, g, b, 1.f)
 
 typedef enum {
-	SHT_BASIC,
+	SHT_LEET,
 	SHT_SKYDOME,
 	SHT_COUNT,
 } ShaderType;
@@ -21,8 +21,7 @@ typedef enum {
 
 void sh_init(), sh_teardown();
 
-void sh_set(ShaderValue idx, const void* value, int type);
-void sh_set_v(ShaderValue idx, const void* value, int type, int count);
-void sh_set_raw(const char* name, const void* value, int type, int count);
+void sh_set(ShaderType, ShaderValue, const void* value, int type);
+void sh_set_raw(ShaderType, const char* name, const void* value, int type);
 
-Material* make_materials();
+Material* make_leet_materials();

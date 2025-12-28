@@ -1,10 +1,9 @@
 #version 100
+precision mediump float;
 
 #define MAX_LIGHTS (128)
 #define LIGHT_DIRECTIONAL (0)
 #define LIGHT_POINT (1)
-
-precision mediump float;
 
 varying vec3 f_pos;
 varying vec2 f_uv;

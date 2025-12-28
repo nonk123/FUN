@@ -93,7 +93,7 @@ static void realmain() {
 		EndTextureMode();
 
 		BeginTextureMode(layers[LAYER_MAIN]);
-		draw_game_fr();
+		// draw_game_fr();
 		EndTextureMode();
 
 		BeginDrawing();
