@@ -29,6 +29,8 @@ static void realmain() {
 
 		if (IsKeyDown(KEY_R))
 			restart(), ticks += 1.f;
+		if (IsKeyPressed(KEY_K))
+			MaximizeWindow();
 
 		while (ticks >= 1.f)
 			game_update(), ticks -= 1.f;
