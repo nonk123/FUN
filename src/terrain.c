@@ -96,10 +96,6 @@ static float c_z(const Chunk* c, int64_t z) {
 	return ((float)(c->z * RESOLUTION + z) / RESOLUTION) * SIDE;
 }
 
-static float c_height(const Chunk* c, int64_t x, int64_t z) {
-	return t_height(c_x(c, x), c_z(c, z));
-}
-
 Vector3 t_norm(float x, float z) {
 	const float step = SIDE / (float)RESOLUTION;
 
@@ -107,10 +103,6 @@ Vector3 t_norm(float x, float z) {
 	norm.x = t_height(x - step, z) - t_height(x + step, z);
 	norm.z = t_height(x, z - step) - t_height(x, z + step);
 	return Vector3Normalize(norm);
-}
-
-static Vector3 c_norm(const Chunk* c, int64_t x, int64_t z) {
-	return t_norm(c_x(c, x), c_z(c, z));
 }
 
 static void nuke_chunk(Chunk* target) {
@@ -144,9 +136,9 @@ static void generate_vert(const Chunk* c, size_t idx, int64_t x, int64_t z) {
 	Vector2* texcoords = (Vector2*)c->model.meshes->texcoords;
 	Color* colors = (Color*)c->model.meshes->colors;
 
-	vertices[idx] = XYZ((float)x / RESOLUTION * SIDE, c_height(c, x, z), (float)z / RESOLUTION * SIDE);
+	vertices[idx] = XYZ((float)x / RESOLUTION * SIDE, t_height(c_x(c, x), c_z(c, z)), (float)z / RESOLUTION * SIDE);
 	texcoords[idx] = XY((float)x / RESOLUTION, (float)z / RESOLUTION);
-	norms[idx] = c_norm(c, x, z);
+	norms[idx] = t_norm(c_x(c, x), c_z(c, z));
 	colors[idx] = WHITE;
 }
 
