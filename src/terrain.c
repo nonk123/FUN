@@ -10,7 +10,7 @@
 #include "terrain.h"
 #include "vecmath.h"
 
-/// Can't explain this one. Don't ask.
+/// How many chunks to spread a complete grass texture over.
 #define UV_SCALE (3.f)
 
 /// Points per side of a chunk.
