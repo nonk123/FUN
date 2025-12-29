@@ -10,13 +10,13 @@ static Material material = {0};
 
 void skydome_init() {
 	mesh = GenMeshPlane(64.f, 64.f, 16, 16);
-	material = LoadMaterialDefault();
+	material.maps = MemAlloc(sizeof(*material.maps));
 	material.maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
 	material.shader = shaders[SHT_SKYDOME];
 }
 
 void skydome_teardown() {
-	UnloadMaterial(material);
+	MemFree(material.maps);
 	UnloadMesh(mesh);
 }
 
