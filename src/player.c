@@ -7,7 +7,10 @@
 #include "terrain.h"
 
 #define MOUSE_SENSITIVITY (9.f / 96.f)
+
+#define MASS (4.f)
 #define JUMP_IMPULSE (8.f)
+#define FRICTION (0.2f)
 
 static struct {
 	Vector3 feet, linvel;
@@ -58,12 +61,15 @@ void player_update() {
 
 	const float stick_threshold = 0.03f, bottom = t_height(player.feet.x, player.feet.z);
 	if (player.feet.y <= bottom + stick_threshold) {
-		player.feet.y = bottom, player.linvel.y = 0.f;
-		const float friction = 4.f / TICKRATE;
+		Vector3 normal = Vector3Scale(t_norm(player.feet.x, player.feet.z), fabsf(player.linvel.y));
+		normal = Vector3Scale(normal, 1.f / TICKRATE);
 
+		player.feet.y = bottom, player.linvel.y = 0.f;
+		player.linvel = Vector3Add(player.linvel, normal);
 		if (IsKeyPressed(KEY_SPACE))
 			player.linvel.y += JUMP_IMPULSE;
-		else {
+		else { // intentionally skip friction during jump
+			const float friction = (FRICTION * MASS * GRAVITY) / TICKRATE;
 			setabs(&player.linvel.x, fabsf(player.linvel.x) - friction);
 			setabs(&player.linvel.z, fabsf(player.linvel.z) - friction);
 		}
