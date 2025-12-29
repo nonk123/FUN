@@ -157,14 +157,9 @@ static void generate_chunk(float x, float z) {
 	c->model.meshCount = 1, c->model.meshes = mesh;
 	c->model.transform = MatrixIdentity();
 
-	c->model.materialCount = 1;
-	c->model.materials = MemAlloc(sizeof(Material) * c->model.materialCount);
-
-	c->model.materials = make_leet_materials();
+	c->model.materialCount = 1, c->model.materials = make_leet_materials();
 	c->model.materials->maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
-
-	c->model.meshMaterial = MemAlloc(sizeof(int));
-	*c->model.meshMaterial = 0;
+	c->model.meshMaterial = MemAlloc(sizeof(int)), c->model.meshMaterial[0] = 0;
 
 	mesh->triangleCount = 2 * RESOLUTION * RESOLUTION;
 	mesh->vertexCount = 3 * mesh->triangleCount;
