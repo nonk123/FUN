@@ -13,7 +13,7 @@ static void check_light_count() {
 		light_count = MAX_LIGHTS;
 }
 
-void light_reset() {
+void light_begin() {
 	memset(lights, 0, sizeof(lights));
 	light_count = 0;
 }
@@ -22,7 +22,7 @@ static void light_set(int idx, const char* field, const void* value, int type) {
 	sh_set_raw(SHT_LEET, TextFormat("lights[%d].%s", idx, field), value, type);
 }
 
-void light_done() {
+void light_end() {
 	check_light_count();
 	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &light_count, SHADER_UNIFORM_INT);
 

@@ -15,7 +15,7 @@ typedef struct {
 	LightType type;
 } Light;
 
-void light_reset(), light_done();
+void light_begin(), light_end();
 
 void light_pos(float, float, float), light_pos_v(Vector3);
 void light_color(float, float, float, float), light_color_v(Color);
