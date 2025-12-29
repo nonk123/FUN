@@ -27,13 +27,15 @@ void main() {
 	vec4 light_color = ambient;
 	for (int i = 0; i < light_count; i++) {
 		float diffuse = 0.0;
-		if (lights[i].type == LIGHT_POINT) {
+		if (lights[i].type == LIGHT_DIRECTIONAL) {
+			diffuse = dot(f_norm, normalize(-lights[i].aux));
+		} else if (lights[i].type == LIGHT_POINT) {
 			vec3 light_dist = lights[i].position - f_pos;
-			float fact = clamp(lights[i].aux.x / length(light_dist), 0.0, 1.0);
+			float factor = clamp(lights[i].aux.x / length(light_dist), 0.0, 1.0);
 			vec3 light_dir = normalize(light_dist);
-			diffuse = max(0.0, fact * dot(f_norm, light_dir));
+			diffuse = factor * dot(f_norm, light_dir);
 		}
-		light_color += lights[i].color * diffuse;
+		light_color += lights[i].color * max(0.0, diffuse);
 	}
 
 	light_color = min(light_color, vec4(1.0));

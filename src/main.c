@@ -40,11 +40,16 @@ static void draw_game_fr() {
 	ClearTransparent();
 	BeginMode3D(camera);
 	{
+		sh_set(SHT_LEET, SHV_AMBIENT, RGBA(1.f, 1.f, 1.f, 0.3f), SHADER_UNIFORM_VEC4);
 		light_begin();
 		{
-			light_pos(10, 7, 10);
-			light_color(1.f, 1.f, 1.f, 0.8f);
-			light_radius(10.f);
+			/* light_pos(10, 7, 10); */
+			/* light_color(1.f, 1.f, 1.f, 0.5f); */
+			/* light_radius(10.f); */
+			/* place_light(); */
+
+			light_dir(0.8f, -0.5f, 0.1f);
+			light_color(1.f, 1.f, 1.f, 0.7f);
 			place_light();
 		}
 		light_end();

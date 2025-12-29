@@ -39,6 +39,7 @@ void light_pos(float x, float y, float z) {
 }
 
 void light_pos_v(Vector3 position) {
+	lights[light_count].type = LIGHT_POINT;
 	lights[light_count].position = position;
 }
 
@@ -47,6 +48,7 @@ void light_dir(float x, float y, float z) {
 }
 
 void light_dir_v(Vector3 direction) {
+	light_pos_v(ORIGIN);
 	lights[light_count].type = LIGHT_DIRECTIONAL;
 	lights[light_count].aux = Vector3Normalize(direction);
 }
