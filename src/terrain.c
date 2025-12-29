@@ -70,15 +70,11 @@ void t_init() {
 }
 
 void t_teardown() {
-	UnloadTexture(green_grass);
-	kill_terrain();
+	UnloadTexture(green_grass), kill_terrain();
 }
 
 static Vector2 chunk_center(const Chunk* ch) {
-	Vector2 c = {0};
-	c.x = floorf((float)ch->x * SIDE);
-	c.y = floorf((float)ch->z * SIDE);
-	return c;
+	return XY(roundf((float)ch->x * SIDE), roundf((float)ch->z * SIDE));
 }
 
 static float noise_at(float x, float z, int octave) {
@@ -187,8 +183,8 @@ static int64_t i64abs(int64_t x) {
 
 void t_update() {
 	extern Camera3D camera;
-	const Vector2 centerf = {.x = camera.position.x, .y = camera.position.z};
-	const int64_t centerx = (int64_t)(floorf(centerf.x) / SIDE), centerz = (int64_t)(floorf(centerf.y) / SIDE);
+	const Vector2 centerf = XY(camera.position.x, camera.position.z);
+	const int64_t centerx = (int64_t)(roundf(centerf.x) / SIDE), centerz = (int64_t)(roundf(centerf.y) / SIDE);
 
 	for (Chunk* c = root; c; c = c->next)
 		if (i64abs(c->x - centerx) > VIEW_RADIUS || i64abs(c->z - centerz) > VIEW_RADIUS)
@@ -207,7 +203,7 @@ void t_update() {
 
 void t_draw() {
 	for (const Chunk* c = root; c; c = c->next) {
-		Vector3 pos = {.x = SIDE * (float)c->x, .y = 0.f, .z = SIDE * (float)c->z};
+		Vector3 pos = XYZ(c_x(c, 0), 0.f, c_z(c, 0));
 		DrawModel(c->model, pos, 1.f, WHITE);
 	}
 }
