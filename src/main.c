@@ -54,12 +54,10 @@ static void draw_game_fr() {
 }
 
 static void compose_layers() {
-	Rectangle src = {0.f, 0.f, (float)last_w, (float)last_h}, dest = src;
-	src.height *= -1;
-
+	const Rectangle src = {0.f, 0.f, (float)last_w, (float)-last_h};
 	ClearBackground(BLACK);
 	for (int i = 0; i < LAYER_COUNT; i++)
-		DrawTexturePro(layers[i].texture, src, dest, XY(0.f, 0.f), 0.f, WHITE);
+		DrawTextureRec(layers[i].texture, src, XY(0.f, 0.f), WHITE);
 	DrawFPS(5, 5);
 }
 
