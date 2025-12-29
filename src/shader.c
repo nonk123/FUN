@@ -44,10 +44,8 @@ void sh_init() {
 		shaders[i] = LoadShaderFromMemory(vsh, fsh);
 		expect(shaders[i].id, "Failed to load shader %d", i);
 
-		if (i == SHT_LEET) {
-			shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
-			shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
-		}
+		shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
+		shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
 	}
 
 	const int zero = 0;

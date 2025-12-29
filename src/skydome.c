@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <raylib.h>
 #include <raymath.h>
 
@@ -5,29 +7,47 @@
 #include "shader.h"
 #include "vecmath.h"
 
-static Mesh mesh = {0};
-static Material material = {0};
+static Model model = {0};
 
 void skydome_init() {
-	mesh = GenMeshPlane(64.f, 64.f, 16, 16);
-	material.maps = MemAlloc(sizeof(*material.maps));
-	material.maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-	material.shader = shaders[SHT_SKYDOME];
+	model.meshCount = 1, model.meshes = MemAlloc(sizeof(*model.meshes));
+	model.materialCount = 1, model.materials = MemAlloc(sizeof(*model.materials));
+	model.meshMaterial = MemAlloc(sizeof(model.meshMaterial)), model.meshMaterial[0] = 0;
+	model.materials->maps = MemAlloc(sizeof(*model.materials->maps));
+	model.materials->maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+	model.materials->shader = shaders[SHT_SKYDOME];
+	model.transform = MatrixIdentity();
+
+	Mesh *mesh = model.meshes, tmpmesh = GenMeshSphere(1.f, 32, 32);
+	mesh->vertexCount = tmpmesh.vertexCount, mesh->triangleCount = tmpmesh.triangleCount;
+	mesh->vertices = MemAlloc((size_t)mesh->vertexCount * 3 * sizeof(float));
+	memcpy(mesh->vertices, tmpmesh.vertices, (size_t)mesh->vertexCount * 3 * sizeof(float));
+	mesh->normals = MemAlloc((size_t)mesh->vertexCount * 3 * sizeof(float));
+	memcpy(mesh->normals, tmpmesh.normals, (size_t)mesh->vertexCount * 3 * sizeof(float));
+	mesh->texcoords = MemAlloc((size_t)mesh->vertexCount * 2 * sizeof(float));
+	memcpy(mesh->texcoords, tmpmesh.texcoords, (size_t)mesh->vertexCount * 2 * sizeof(float));
+
+	Vector3* vertices = (Vector3*)mesh->vertices;
+	for (int i = 0; i < mesh->triangleCount; i++) {
+		Vector3 tmp = vertices[i * 3 + 2];
+		vertices[i * 3 + 2] = vertices[i * 3 + 0];
+		vertices[i * 3 + 0] = tmp;
+	}
+
+	for (int i = 0; i < 3 * mesh->vertexCount; i++)
+		mesh->normals[i] *= -1.f;
+
+	UnloadMesh(tmpmesh), UploadMesh(mesh, false);
 }
 
 void skydome_teardown() {
-	MemFree(material.maps);
-	UnloadMesh(mesh);
+	UnloadModel(model);
 }
 
 void skydome_draw() {
 	extern Camera3D camera;
-	Camera3D worthless = camera;
-	/* worthless.position = ORIGIN, worthless.target = Vector3Subtract(worthless.target, camera.position); */
-	worthless.position = XYZ(0, 0, -1), worthless.target = ORIGIN;
-
 	ClearTransparent();
-	/* BeginMode3D(worthless); */
-	DrawMesh(mesh, material, MatrixIdentity());
-	/* EndMode3D(); */
+	BeginMode3D(camera);
+	DrawModel(model, camera.position, 1.f, WHITE);
+	EndMode3D();
 }
