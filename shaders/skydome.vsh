@@ -6,7 +6,6 @@ attribute vec3 v_norm;
 attribute vec4 v_color;
 
 uniform mat4 mvp;
-uniform mat4 m_model;
 
 varying vec3 f_pos;
 

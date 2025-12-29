@@ -5,7 +5,6 @@
 
 #include "raylibext.h"
 #include "shader.h"
-#include "vecmath.h"
 
 static Model model = {0};
 

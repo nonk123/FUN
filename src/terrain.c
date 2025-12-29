@@ -148,10 +148,7 @@ static void generate_vert(const Chunk* c, size_t idx, int64_t offx, int64_t offz
 
 static void generate_chunk(float x, float z) {
 	Chunk* c = MemAlloc(sizeof(*c));
-	c->next = root, root = c;
-
-	c->x = (int64_t)(x / SIDE);
-	c->z = (int64_t)(z / SIDE);
+	c->next = root, root = c, c->x = (int64_t)(x / SIDE), c->z = (int64_t)(z / SIDE);
 
 	Mesh* mesh = MemAlloc(sizeof(*mesh));
 	c->model.meshCount = 1, c->model.meshes = mesh;
