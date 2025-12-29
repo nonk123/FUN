@@ -6,9 +6,14 @@
 #include <raymath.h>
 
 #include "assets.h"
+#include "game.h"
 #include "shader.h"
 #include "terrain.h"
 #include "vecmath.h"
+
+/// How many seconds to generate chunks for before moving on with the
+/// rest of the game logic.
+#define GENERATION_PERIOD (0.8 / TICKRATE)
 
 /// How many chunks to spread a complete grass texture over.
 #define UV_SCALE (3.f)
@@ -190,6 +195,7 @@ void t_update() {
 		if (i64abs(c->x - centerx) > VIEW_RADIUS || i64abs(c->z - centerz) > VIEW_RADIUS)
 			nuke_chunk(c);
 
+	const double start = GetTime();
 	for (int64_t ix = -VIEW_RADIUS; ix <= VIEW_RADIUS; ix++)
 		for (int64_t iz = -VIEW_RADIUS; iz <= VIEW_RADIUS; iz++) {
 			if (i64abs(centerx - ix) > VIEW_RADIUS || i64abs(centerz - iz) > VIEW_RADIUS)
@@ -198,6 +204,8 @@ void t_update() {
 			if (chunk_exists(x, z))
 				continue;
 			generate_chunk(x, z);
+			if (GetTime() - start > GENERATION_PERIOD)
+				return;
 		}
 }
 
