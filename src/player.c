@@ -59,8 +59,8 @@ void player_update() {
 	player.linvel.y -= GRAVITY / TICKRATE;
 	player.feet = Vector3Add(player.feet, Vector3Scale(player.linvel, 1.f / TICKRATE));
 
-	const float stick_threshold = 0.03f, bottom = t_height(player.feet.x, player.feet.z);
-	if (player.feet.y <= bottom + stick_threshold) {
+	const float stick_threshold = (GRAVITY * 1.1f) / TICKRATE, bottom = t_height(player.feet.x, player.feet.z);
+	if (player.linvel.y < EPSILON && player.feet.y - bottom - stick_threshold < EPSILON) {
 		Vector3 normal = Vector3Scale(t_norm(player.feet.x, player.feet.z), fabsf(player.linvel.y));
 		normal = Vector3Scale(normal, 1.f / TICKRATE);
 
