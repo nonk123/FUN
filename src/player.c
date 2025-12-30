@@ -9,8 +9,11 @@
 #define MOUSE_SENSITIVITY (9.f / 96.f)
 
 #define MASS (4.f)
+#define FRICTION (0.7f)
+
+#define WALK_SPEED (6.f)
+#define ACCELERATION (12.f)
 #define JUMP_IMPULSE (8.f)
-#define FRICTION (0.2f)
 
 static struct {
 	Vector3 feet, linvel;
@@ -31,6 +34,11 @@ static void setabs(float* out, float abs) {
 	*out = (float)(abs >= EPSILON) * fsign(*out) * fabsf(abs);
 }
 
+static void accelerate(float* axis, float amount) {
+	if (fabsf(*axis) < EPSILON || fabsf(*axis) < WALK_SPEED || (*axis < 0) != (amount < 0))
+		*axis += amount;
+}
+
 void player_update() {
 	{
 		const Vector2 dpos = GetMouseDelta();
@@ -44,6 +52,11 @@ void player_update() {
 		player.camera_pitch = Clamp(player.camera_pitch, -max, max);
 	}
 
+	player.linvel.y -= GRAVITY / TICKRATE;
+	const float stick_threshold = (GRAVITY * 1.1f) / TICKRATE, bottom = t_height(player.feet.x, player.feet.z);
+	const bool on_ground = player.linvel.y < EPSILON && player.feet.y - bottom - stick_threshold < EPSILON;
+	const Vector3 normal = t_norm(player.feet.x, player.feet.z);
+
 	const float zdir = (float)IsKeyDown(KEY_W) - (float)IsKeyDown(KEY_S),
 		    xdir = (float)IsKeyDown(KEY_D) - (float)IsKeyDown(KEY_A);
 	if (fabsf(zdir) > EPSILON || fabsf(xdir) > EPSILON) {
@@ -51,30 +64,24 @@ void player_update() {
 		forward = Vector3RotateByAxisAngle(forward, UP, player.camera_yaw);
 		side = Vector3RotateByAxisAngle(side, UP, player.camera_yaw);
 
-		Vector3 absolute = Vector3Add(forward, side);
-		absolute = Vector3Scale(Vector3Normalize(absolute), 5.f);
-		player.linvel.x = absolute.x, player.linvel.z = absolute.z;
+		Vector3 absolute = Vector3Normalize(Vector3Add(forward, side));
+		absolute = Vector3Scale(absolute, ACCELERATION / TICKRATE);
+		accelerate(&player.linvel.x, absolute.x), accelerate(&player.linvel.z, absolute.z);
 	}
 
-	player.linvel.y -= GRAVITY / TICKRATE;
-	player.feet = Vector3Add(player.feet, Vector3Scale(player.linvel, 1.f / TICKRATE));
-
-	const float stick_threshold = (GRAVITY * 1.1f) / TICKRATE, bottom = t_height(player.feet.x, player.feet.z);
-	if (player.linvel.y < EPSILON && player.feet.y - bottom - stick_threshold < EPSILON) {
-		Vector3 normal = Vector3Scale(t_norm(player.feet.x, player.feet.z), fabsf(player.linvel.y));
-		normal = Vector3Scale(normal, 1.f / TICKRATE);
-
-		player.feet.y = bottom, player.linvel.y = 0.f;
-		player.linvel = Vector3Add(player.linvel, normal);
+	if (on_ground) {
+		float friction = (FRICTION * MASS * GRAVITY) / TICKRATE;
+		friction *= Vector3DotProduct(Vector3Normalize(player.linvel), Vector3Negate(normal));
+		player.feet.y = t_height(player.feet.x, player.feet.z), player.linvel.y = 0.f;
 		if (IsKeyPressed(KEY_SPACE))
 			player.linvel.y += JUMP_IMPULSE;
 		else { // intentionally skip friction during jump
-			const float friction = (FRICTION * MASS * GRAVITY) / TICKRATE;
 			setabs(&player.linvel.x, fabsf(player.linvel.x) - friction);
 			setabs(&player.linvel.z, fabsf(player.linvel.z) - friction);
 		}
 	}
 
+	player.feet = Vector3Add(player.feet, Vector3Scale(player.linvel, 1.f / TICKRATE));
 	{
 		Vector3 pos = player.feet, dir = Vector3RotateByAxisAngle(FORWARD, RIGHT, player.camera_pitch);
 		pos.y += PLAYER_HEIGHT * 0.7f, dir = Vector3RotateByAxisAngle(dir, UP, player.camera_yaw);
