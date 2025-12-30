@@ -191,23 +191,19 @@ static void generate_chunk(float x, float z) {
 	UploadMesh(mesh, false);
 }
 
-static int64_t i64abs(int64_t x) {
-	return x < 0 ? -x : x;
-}
-
 void t_update() {
 	extern Camera3D camera;
 	const Vector2 centerf = XY(camera.position.x, camera.position.z);
 	const int64_t centerx = (int64_t)(roundf(centerf.x) / SIDE), centerz = (int64_t)(roundf(centerf.y) / SIDE);
 
 	for (Chunk* c = root; c; c = c->next)
-		if (i64abs(c->x - centerx) > VIEW_RADIUS || i64abs(c->z - centerz) > VIEW_RADIUS)
+		if (llabs(c->x - centerx) > VIEW_RADIUS || llabs(c->z - centerz) > VIEW_RADIUS)
 			nuke_chunk(c);
 
 	const double start = GetTime();
 	for (int64_t ix = -VIEW_RADIUS; ix <= VIEW_RADIUS; ix++)
 		for (int64_t iz = -VIEW_RADIUS; iz <= VIEW_RADIUS; iz++) {
-			if (i64abs(centerx - ix) > VIEW_RADIUS || i64abs(centerz - iz) > VIEW_RADIUS)
+			if (llabs(centerx - ix) > VIEW_RADIUS || llabs(centerz - iz) > VIEW_RADIUS)
 				continue;
 			const float x = centerf.x + (float)ix * SIDE, z = centerf.y + (float)iz * SIDE;
 			if (chunk_exists(x, z))
