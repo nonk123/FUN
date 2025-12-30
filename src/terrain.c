@@ -139,18 +139,6 @@ static float txbruh(int64_t a, float b) {
 	return (b + (float)(a % UV_SCALE)) / UV_SCALE;
 }
 
-static void generate_vert(const Chunk* c, size_t idx, int64_t offx, int64_t offz) {
-	Vector3 *vertices = (Vector3*)c->model.meshes->vertices, *norms = (Vector3*)c->model.meshes->normals;
-	Vector2* texcoords = (Vector2*)c->model.meshes->texcoords;
-	Color* colors = (Color*)c->model.meshes->colors;
-
-	const float x01 = (float)offx / RESOLUTION, z01 = (float)offz / RESOLUTION;
-	vertices[idx] = XYZ(x01 * SIDE, t_height(c_x(c, offx), c_z(c, offz)), z01 * SIDE);
-	texcoords[idx] = XY(txbruh(c->x, x01), txbruh(c->z, z01));
-	norms[idx] = t_norm(c_x(c, offx), c_z(c, offz));
-	colors[idx] = WHITE;
-}
-
 static void generate_chunk(float x, float z) {
 	Chunk* c = MemAlloc(sizeof(*c));
 	c->next = root, root = c, c->x = (int64_t)(roundf(x) / SIDE), c->z = (int64_t)(roundf(z) / SIDE);
@@ -163,24 +151,41 @@ static void generate_chunk(float x, float z) {
 	c->model.materials->maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
 	c->model.meshMaterial = MemAlloc(sizeof(int)), c->model.meshMaterial[0] = 0;
 
+	mesh->vertexCount = (RESOLUTION + 1) * (RESOLUTION + 1);
 	mesh->triangleCount = 2 * RESOLUTION * RESOLUTION;
-	mesh->vertexCount = 3 * mesh->triangleCount;
 
+	mesh->indices = MemAlloc(3 * sizeof(uint16_t) * mesh->triangleCount);
 	mesh->vertices = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
 	mesh->normals = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
+	Vector3 *vertices = (Vector3*)c->model.meshes->vertices, *norms = (Vector3*)c->model.meshes->normals;
+	Vector2* texcoords = (Vector2*)c->model.meshes->texcoords;
+	Color* colors = (Color*)c->model.meshes->colors;
+
+	size_t v = 0;
+	for (int z = 0; z <= RESOLUTION; z++)
+		for (int x = 0; x <= RESOLUTION; x++) {
+			const float x01 = (float)x / RESOLUTION, z01 = (float)z / RESOLUTION;
+			vertices[v] = XYZ(x01 * SIDE, t_height(c_x(c, x), c_z(c, z)), z01 * SIDE);
+			texcoords[v] = XY(txbruh(c->x, x01), txbruh(c->z, z01));
+			norms[v] = t_norm(c_x(c, x), c_z(c, z)), colors[v] = WHITE;
+			v += 1;
+		}
+
 	size_t i = 0;
 	for (int z = 0; z < RESOLUTION; z++)
 		for (int x = 0; x < RESOLUTION; x++) {
-			generate_vert(c, i++, x, z);
-			generate_vert(c, i++, x + 1, z + 1);
-			generate_vert(c, i++, x + 1, z);
+			const uint16_t v = x + z * (RESOLUTION + 1);
 
-			generate_vert(c, i++, x, z);
-			generate_vert(c, i++, x, z + 1);
-			generate_vert(c, i++, x + 1, z + 1);
+			mesh->indices[i++] = v;
+			mesh->indices[i++] = v + RESOLUTION + 2;
+			mesh->indices[i++] = v + 1;
+
+			mesh->indices[i++] = v;
+			mesh->indices[i++] = v + RESOLUTION + 1;
+			mesh->indices[i++] = v + RESOLUTION + 2;
 		}
 
 	UploadMesh(mesh, false);
