@@ -20,7 +20,7 @@ static struct {
 } player;
 
 void player_restart() {
-	player.feet = XYZ(0, 20, 0);
+	player.feet = player.linvel = ORIGIN;
 	player.feet.y = t_height(player.feet.x, player.feet.z);
 	player.camera_pitch = player.camera_yaw = 0.f;
 }
