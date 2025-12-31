@@ -8,12 +8,11 @@
 
 #define MOUSE_SENSITIVITY (9.f / 96.f)
 
-#define MASS (4.f)
-#define FRICTION (0.7f)
-
 #define WALK_SPEED (6.f)
-#define ACCELERATION (12.f)
+#define WALK_ACCELERATION (24.f)
 #define JUMP_IMPULSE (8.f)
+
+#define FRICTION (0.7f)
 
 static struct {
 	Vector3 feet, linvel;
@@ -26,16 +25,8 @@ void player_restart() {
 	player.camera_pitch = player.camera_yaw = 0.f;
 }
 
-static float fsign(float x) {
-	return x < 0.f ? -1.f : 1.f;
-}
-
-static void setabs(float* out, float abs) {
-	*out = (float)(abs >= EPSILON) * fsign(*out) * fabsf(abs);
-}
-
 static void accelerate(float* axis, float amount) {
-	if (fabsf(*axis) < EPSILON || fabsf(*axis) < WALK_SPEED || (*axis < 0) != (amount < 0))
+	if ((*axis >= 0.f) != (amount >= 0.f) || fabsf(*axis) < WALK_SPEED)
 		*axis += amount;
 }
 
@@ -65,21 +56,28 @@ void player_update() {
 		side = Vector3RotateByAxisAngle(side, UP, player.camera_yaw);
 
 		Vector3 absolute = Vector3Normalize(Vector3Add(forward, side));
-		absolute = Vector3Scale(absolute, ACCELERATION / TICKRATE);
+		absolute = Vector3Scale(absolute, WALK_ACCELERATION / TICKRATE);
 		accelerate(&player.linvel.x, absolute.x), accelerate(&player.linvel.z, absolute.z);
 	}
 
 	if (on_ground) {
-		float friction = (FRICTION * MASS * GRAVITY) / TICKRATE;
-		friction *= Vector3DotProduct(Vector3Normalize(player.linvel), Vector3Negate(normal));
+		const Vector3 lindir = Vector3Normalize(player.linvel);
+		const float friction = normal.y * (FRICTION * GRAVITY) / TICKRATE;
 		player.feet.y = t_height(player.feet.x, player.feet.z), player.linvel.y = 0.f;
+
 		if (IsKeyPressed(KEY_SPACE))
 			player.linvel.y += JUMP_IMPULSE;
 		else { // intentionally skip friction during jump
-			setabs(&player.linvel.x, fabsf(player.linvel.x) - friction);
-			setabs(&player.linvel.z, fabsf(player.linvel.z) - friction);
+			player.linvel.x -= friction * lindir.x;
+			player.linvel.z -= friction * lindir.z;
 		}
 	}
+
+	// clang-format off
+	if (fabsf(player.linvel.x) < EPSILON) player.linvel.x = 0.f;
+	if (fabsf(player.linvel.y) < EPSILON) player.linvel.y = 0.f;
+	if (fabsf(player.linvel.z) < EPSILON) player.linvel.z = 0.f;
+	// clang-format on
 
 	player.feet = Vector3Add(player.feet, Vector3Scale(player.linvel, 1.f / TICKRATE));
 	{
