@@ -12,11 +12,9 @@
 #define WALK_ACCELERATION (24.f)
 #define JUMP_IMPULSE (8.f)
 
-#define FRICTION (0.7f)
-
 static struct {
 	Vector3 feet, linvel;
-	float camera_pitch, camera_yaw;
+	float camera_pitch, camera_yaw, friction;
 } player;
 
 void player_restart() {
@@ -43,6 +41,8 @@ void player_update() {
 		player.camera_pitch = Clamp(player.camera_pitch, -max, max);
 	}
 
+	player.friction = 0.7f * (float)!IsKeyDown(KEY_LEFT_SHIFT);
+
 	player.linvel.y -= GRAVITY / TICKRATE;
 	const float stick_threshold = (GRAVITY * 1.1f) / TICKRATE, bottom = t_height(player.feet.x, player.feet.z);
 	const bool on_ground = player.linvel.y < EPSILON && player.feet.y - bottom - stick_threshold < EPSILON;
@@ -62,7 +62,7 @@ void player_update() {
 
 	if (on_ground) {
 		const Vector3 lindir = Vector3Normalize(player.linvel);
-		const float friction = normal.y * (FRICTION * GRAVITY) / TICKRATE;
+		const float friction = normal.y * (player.friction * GRAVITY) / TICKRATE;
 		player.feet.y = t_height(player.feet.x, player.feet.z), player.linvel.y = 0.f;
 
 		if (IsKeyPressed(KEY_SPACE))
