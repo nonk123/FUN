@@ -15,17 +15,12 @@ FetchContent_Declare(raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
     GIT_TAG 5.5)
 
-FetchContent_Declare(noise
-    GIT_REPOSITORY https://github.com/smcameron/open-simplex-noise-in-c.git
-    GIT_TAG 53cf5bfd4a5289f263568bedd778e2d86eb8a1ef)
+FetchContent_Declare(open-simplex-noise-in-c
+    GIT_REPOSITORY https://github.com/nonk123/open-simplex-noise-in-c.git
+    GIT_TAG 53cea3fd878e6eba54963f09c067632c9dbdb320)
 
-FetchContent_MakeAvailable(raylib noise)
-
-add_library(noise
-    ${noise_SOURCE_DIR}/open-simplex-noise.c
-    ${noise_SOURCE_DIR}/open-simplex-noise.h)
-target_include_directories(noise PUBLIC ${noise_SOURCE_DIR})
-target_compile_definitions(noise PUBLIC OSNFLOAT=float)
+set(OSN_FLOAT_TYPE float CACHE STRING "" FORCE)
+FetchContent_MakeAvailable(raylib open-simplex-noise-in-c)
 
 file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.c)
 file(GLOB_RECURSE HEADERS ${CMAKE_SOURCE_DIR}/include/*.h)
@@ -45,7 +40,7 @@ embed_txt(shaders/skydome.vsh)
 embed_txt(shaders/skydome.fsh)
 
 add_executable(fun ${SOURCES} ${HEADERS})
-target_link_libraries(fun PRIVATE raylib noise)
+target_link_libraries(fun PRIVATE raylib open-simplex-noise-in-c)
 target_include_directories(fun
     PRIVATE ${CMAKE_SOURCE_DIR}/include ${GENERATED})
 target_compile_definitions(fun
