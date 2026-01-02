@@ -160,12 +160,14 @@ static void generate_chunk(float x, float z) {
 	mesh->indices = MemAlloc(3 * sizeof(uint16_t) * mesh->triangleCount);
 	mesh->vertices = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
 	mesh->normals = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
+	mesh->tangents = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
-	Vector3 *vertices = (Vector3*)c->model.meshes->vertices, *norms = (Vector3*)c->model.meshes->normals;
-	Vector2* texcoords = (Vector2*)c->model.meshes->texcoords;
-	Color* colors = (Color*)c->model.meshes->colors;
+	Vector3 *vertices = (Vector3*)mesh->vertices, *norms = (Vector3*)mesh->normals,
+		*tangents = (Vector3*)mesh->tangents;
+	Vector2* texcoords = (Vector2*)mesh->texcoords;
+	Color* colors = (Color*)mesh->colors;
 
 	size_t v = 0;
 	for (int z = 0; z <= RESOLUTION; z++)
@@ -174,6 +176,7 @@ static void generate_chunk(float x, float z) {
 			vertices[v] = XYZ(x01 * SIDE, t_height(c_x(c, x), c_z(c, z)), z01 * SIDE);
 			texcoords[v] = XY(txbruh(c->x, x01), txbruh(c->z, z01));
 			norms[v] = t_norm(c_x(c, x), c_z(c, z)), colors[v] = WHITE;
+			tangents[v] = Vector3CrossProduct(norms[v], UP);
 			v += 1;
 		}
 

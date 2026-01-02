@@ -26,7 +26,6 @@ Material* make_leet_materials() {
 	Material* material = MemAlloc(sizeof(*material));
 	material->maps = MemAlloc(8 * sizeof(*material->maps));
 	material->maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
-	material->maps[MATERIAL_MAP_NORMAL].value = 0.f;
 	material->shader = shaders[SHT_LEET];
 	return material;
 }
@@ -46,6 +45,7 @@ void sh_init() {
 
 		shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
 		shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
+		shaders[i].locs[SHADER_LOC_MATRIX_NORMAL] = GetShaderLocation(shaders[i], "m_normal");
 	}
 
 	shaders[SHT_LEET].locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(shaders[SHT_LEET], "albedo");
