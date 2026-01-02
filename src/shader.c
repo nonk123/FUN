@@ -4,7 +4,6 @@
 #include "shader.h"
 
 static const char* VARS[] = {
-	[SHV_TEXTURE] = "texture0",
 	[SHV_AMBIENT] = "ambient",
 	[SHV_LIGHT_COUNT] = "light_count",
 };
@@ -25,8 +24,9 @@ static const char *leet_vsh =
 
 Material* make_leet_materials() {
 	Material* material = MemAlloc(sizeof(*material));
-	material->maps = MemAlloc(sizeof(*material->maps));
+	material->maps = MemAlloc(8 * sizeof(*material->maps));
 	material->maps[MATERIAL_MAP_DIFFUSE].color = WHITE;
+	material->maps[MATERIAL_MAP_NORMAL].value = 0.f;
 	material->shader = shaders[SHT_LEET];
 	return material;
 }
@@ -47,6 +47,9 @@ void sh_init() {
 		shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
 		shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
 	}
+
+	shaders[SHT_LEET].locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(shaders[SHT_LEET], "albedo");
+	shaders[SHT_LEET].locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(shaders[SHT_LEET], "normal_map");
 
 	const int zero = 0;
 	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);

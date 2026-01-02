@@ -14,7 +14,6 @@ typedef enum {
 extern Shader shaders[SHT_COUNT];
 
 typedef enum {
-	SHV_TEXTURE,
 	SHV_AMBIENT,
 	SHV_LIGHT_COUNT,
 } ShaderValue;

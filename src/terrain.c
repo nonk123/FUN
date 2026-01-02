@@ -47,7 +47,7 @@ static struct osn_context* osn = NULL;
 static Chunk* root = NULL;
 static void nuke_chunk(Chunk*);
 
-static Texture2D green_grass = {0};
+static Texture2D green_grass_albedo = {0}, green_grass_normal_map = {0};
 
 static void kill_terrain() {
 	while (root)
@@ -71,11 +71,13 @@ void t_restart() { // used in `game.c`
 
 void t_init() {
 	t_restart();
-	green_grass = LoadTexture(ASSETS "/Grass_A_BaseColor.png");
+	green_grass_albedo = LoadTexture(ASSETS "/Grass_A_BaseColor.png");
+	green_grass_normal_map = LoadTexture(ASSETS "/Grass_A_Normal.png");
 }
 
 void t_teardown() {
-	UnloadTexture(green_grass), kill_terrain();
+	UnloadTexture(green_grass_albedo), UnloadTexture(green_grass_normal_map);
+	kill_terrain();
 }
 
 static Vector2 chunk_center(const Chunk* ch) {
@@ -148,7 +150,8 @@ static void generate_chunk(float x, float z) {
 	c->model.transform = MatrixIdentity();
 
 	c->model.materialCount = 1, c->model.materials = make_leet_materials();
-	c->model.materials->maps[MATERIAL_MAP_ALBEDO].texture = green_grass;
+	c->model.materials->maps[MATERIAL_MAP_ALBEDO].texture = green_grass_albedo;
+	c->model.materials->maps[MATERIAL_MAP_NORMAL].texture = green_grass_normal_map;
 	c->model.meshMaterial = MemAlloc(sizeof(int)), c->model.meshMaterial[0] = 0;
 
 	mesh->vertexCount = (RESOLUTION + 1) * (RESOLUTION + 1);
