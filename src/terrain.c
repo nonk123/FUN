@@ -16,7 +16,7 @@
 #define GENERATION_PERIOD (0.8 / TICKRATE)
 
 /// How many chunks to spread a complete grass texture over.
-#define UV_SCALE (2)
+#define UV_SCALE (1)
 
 /// Points per side of a chunk.
 #define RESOLUTION (16)
