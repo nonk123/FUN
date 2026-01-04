@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28.0 FATAL_ERROR)
 
-project(fun)
+project(FUN)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -39,18 +39,18 @@ embed_txt(shaders/leet.fsh)
 embed_txt(shaders/skydome.vsh)
 embed_txt(shaders/skydome.fsh)
 
-add_executable(fun ${SOURCES} ${HEADERS})
-target_link_libraries(fun PRIVATE raylib open-simplex-noise-in-c)
-target_include_directories(fun
+add_executable(FUN ${SOURCES} ${HEADERS})
+target_link_libraries(FUN PRIVATE raylib open-simplex-noise-in-c)
+target_include_directories(FUN
     PRIVATE ${CMAKE_SOURCE_DIR}/include ${GENERATED})
-target_compile_definitions(fun
+target_compile_definitions(FUN
     PRIVATE _POSIX_C_SOURCE=200112L _WIN32_WINNT=0x0501 WINVER=0x0501)
 
-add_custom_command(TARGET fun POST_BUILD
+add_custom_command(TARGET FUN POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E remove_directory
-    $<TARGET_FILE_DIR:fun>/assets
+    $<TARGET_FILE_DIR:FUN>/assets
 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:fun>/assets
+    ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:FUN>/assets
 
     COMMAND_EXPAND_LISTS)
