@@ -25,16 +25,16 @@
 #define SIDE (16.f)
 
 /// Coordinate downscaling factor for noise computation.
-#define SCALE (20.f)
+#define SCALE (128.f)
 
 /// Another scaling factor for the second noise function.
-#define OCTAVE (2.1f)
+#define OCTAVE (8.2f)
 
 /// (Temporary) heightmap magnitude.
-#define STEEPNESS (8.f)
+#define STEEPNESS (64.f)
 
 /// How many chunks to keep loaded around the camera.
-#define VIEW_RADIUS (5)
+#define VIEW_RADIUS (8)
 
 typedef struct Chunk {
 	int64_t x, z;
