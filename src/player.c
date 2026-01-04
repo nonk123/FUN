@@ -23,11 +23,6 @@ void player_restart() {
 	player.camera_pitch = player.camera_yaw = 0.f;
 }
 
-static void accelerate(float* axis, float amount) {
-	if ((*axis >= 0.f) != (amount >= 0.f) || fabsf(*axis) < WALK_SPEED)
-		*axis += amount;
-}
-
 void player_update() {
 	{
 		const Vector2 dpos = GetMouseDelta();
@@ -57,7 +52,8 @@ void player_update() {
 
 		Vector3 absolute = Vector3Normalize(Vector3Add(forward, side));
 		absolute = Vector3Scale(absolute, WALK_ACCELERATION / TICKRATE);
-		accelerate(&player.linvel.x, absolute.x), accelerate(&player.linvel.z, absolute.z);
+		if (Vector3LengthSqr(player.linvel) < WALK_SPEED * WALK_SPEED)
+			player.linvel = Vector3Add(player.linvel, absolute);
 	}
 
 	if (on_ground) {
