@@ -86,3 +86,9 @@ void player_update() {
 void player_draw() {
 	DrawCapsule(player.feet, Vector3Add(player.feet, Vector3Scale(UP, PLAYER_HEIGHT)), PLAYER_RADIUS, 32, 32, RED);
 }
+
+void player_draw_debug_shit() {
+	const int fs = 20;
+	const char* deboog = TextFormat("V %2f", Vector3Length(player.linvel));
+	DrawText(deboog, 5, GetScreenHeight() - 5 - fs, fs, WHITE);
+}

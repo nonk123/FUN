@@ -5,6 +5,7 @@
 #include "game.h"
 #include "light.h"
 #include "log.h"
+#include "player.h"
 #include "raylibext.h"
 #include "shader.h"
 #include "skydome.h"
@@ -64,6 +65,7 @@ static void compose_layers() {
 	for (int i = 0; i < LAYER_COUNT; i++)
 		DrawTextureRec(layers[i].texture, src, XY(0.f, 0.f), WHITE);
 	DrawFPS(5, 5);
+	player_draw_debug_shit();
 }
 
 static void realmain() {

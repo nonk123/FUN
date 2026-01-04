@@ -4,3 +4,4 @@
 #define PLAYER_RADIUS (0.4f)
 
 void player_restart(), player_update(), player_draw();
+void player_draw_debug_shit();
