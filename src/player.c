@@ -23,6 +23,17 @@ void player_restart() {
 	player.camera_pitch = player.camera_yaw = 0.f;
 }
 
+static float fsign(float x) {
+	return x > EPSILON ? 1.f : x < -EPSILON ? -1.f : 0.f;
+}
+
+static void frick(float* axis, float amount) {
+	const float old_sign = fsign(*axis);
+	*axis -= amount;
+	if (fsign(*axis) != old_sign)
+		*axis = 0.f;
+}
+
 void player_update() {
 	{
 		const Vector2 dpos = GetMouseDelta();
@@ -52,20 +63,20 @@ void player_update() {
 
 		Vector3 absolute = Vector3Normalize(Vector3Add(forward, side));
 		absolute = Vector3Scale(absolute, WALK_ACCELERATION / TICKRATE);
-		if (Vector3LengthSqr(player.linvel) < WALK_SPEED * WALK_SPEED)
+		if (Vector3LengthSqr(XYZ(player.linvel.x, 0.f, player.linvel.z)) < WALK_SPEED * WALK_SPEED)
 			player.linvel = Vector3Add(player.linvel, absolute);
 	}
 
 	if (on_ground) {
-		const Vector3 lindir = Vector3Normalize(player.linvel);
 		const float friction = normal.y * (player.friction * GRAVITY) / TICKRATE;
 		player.feet.y = t_height(player.feet.x, player.feet.z), player.linvel.y = 0.f;
 
 		if (IsKeyPressed(KEY_SPACE))
 			player.linvel.y += JUMP_IMPULSE;
 		else { // intentionally skip friction during jump
-			player.linvel.x -= friction * lindir.x;
-			player.linvel.z -= friction * lindir.z;
+			const Vector3 lindir = Vector3Normalize(player.linvel);
+			frick(&player.linvel.x, friction * lindir.x);
+			frick(&player.linvel.z, friction * lindir.z);
 		}
 	}
 
