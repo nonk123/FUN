@@ -63,7 +63,10 @@ void player_update() {
 
 		Vector3 absolute = Vector3Normalize(Vector3Add(forward, side));
 		absolute = Vector3Scale(absolute, WALK_ACCELERATION / TICKRATE);
-		if (Vector3LengthSqr(XYZ(player.linvel.x, 0.f, player.linvel.z)) < WALK_SPEED * WALK_SPEED)
+
+		const Vector3 xzvel = XYZ(player.linvel.x, 0.f, player.linvel.z);
+		if (Vector3LengthSqr(xzvel) < WALK_SPEED * WALK_SPEED
+			|| fabsf(Vector3DotProduct(absolute, xzvel)) < 1.f)
 			player.linvel = Vector3Add(player.linvel, absolute);
 	}
 
