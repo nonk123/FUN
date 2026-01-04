@@ -1,13 +1,13 @@
-#version 100
+#version 330
 
-attribute vec3 v_position;
-attribute vec2 v_uv;
-attribute vec3 v_norm;
-attribute vec4 v_color;
+in vec3 v_position;
+in vec2 v_uv;
+in vec3 v_norm;
+in vec4 v_color;
 
 uniform mat4 mvp;
 
-varying vec3 f_pos;
+out vec3 f_pos;
 
 void main() {
 	f_pos = v_position;

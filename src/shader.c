@@ -43,13 +43,18 @@ void sh_init() {
 		shaders[i] = LoadShaderFromMemory(vsh, fsh);
 		expect(shaders[i].id, "Failed to load shader %d", i);
 
+		shaders[i].locs[SHADER_LOC_VERTEX_POSITION] = GetShaderLocationAttrib(shaders[i], "v_pos");
+		shaders[i].locs[SHADER_LOC_VERTEX_TEXCOORD01] = GetShaderLocationAttrib(shaders[i], "v_uv");
+		shaders[i].locs[SHADER_LOC_VERTEX_NORMAL] = GetShaderLocationAttrib(shaders[i], "v_norm");
+		shaders[i].locs[SHADER_LOC_VERTEX_COLOR] = GetShaderLocationAttrib(shaders[i], "v_color");
+		shaders[i].locs[SHADER_LOC_VERTEX_TANGENT] = GetShaderLocationAttrib(shaders[i], "v_tangent");
+
 		shaders[i].locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shaders[i], "mvp");
 		shaders[i].locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(shaders[i], "m_model");
-		shaders[i].locs[SHADER_LOC_MATRIX_NORMAL] = GetShaderLocation(shaders[i], "m_normal");
-	}
 
-	shaders[SHT_LEET].locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(shaders[SHT_LEET], "albedo");
-	shaders[SHT_LEET].locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(shaders[SHT_LEET], "normal_map");
+		shaders[i].locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(shaders[i], "albedo");
+		shaders[i].locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(shaders[i], "normal_map");
+	}
 
 	const int zero = 0;
 	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);

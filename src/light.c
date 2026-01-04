@@ -28,7 +28,7 @@ void light_end() {
 
 	for (int i = 0; i < MAX_LIGHTS; i++) {
 		light_set(i, "type", &lights[i].type, SHADER_UNIFORM_INT);
-		light_set(i, "position", &lights[i].position, SHADER_UNIFORM_VEC3);
+		light_set(i, "pos", &lights[i].pos, SHADER_UNIFORM_VEC3);
 		light_set(i, "aux", &lights[i].aux, SHADER_UNIFORM_VEC3);
 		light_set(i, "color", &lights[i].color, SHADER_UNIFORM_VEC4);
 	}
@@ -40,7 +40,7 @@ void light_pos(float x, float y, float z) {
 
 void light_pos_v(Vector3 position) {
 	lights[light_count].type = LIGHT_POINT;
-	lights[light_count].position = position;
+	lights[light_count].pos = position;
 }
 
 void light_dir(float x, float y, float z) {

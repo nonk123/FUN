@@ -10,7 +10,7 @@ typedef enum {
 } LightType;
 
 typedef struct {
-	Vector3 position, aux;
+	Vector3 pos, aux;
 	Vector4 color;
 	LightType type;
 } Light;

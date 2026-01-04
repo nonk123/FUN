@@ -16,7 +16,7 @@
 #define GENERATION_PERIOD (0.8 / TICKRATE)
 
 /// How many chunks to spread a complete grass texture over.
-#define UV_SCALE (3)
+#define UV_SCALE (2)
 
 /// Points per side of a chunk.
 #define RESOLUTION (16)
@@ -73,6 +73,9 @@ void t_init() {
 	t_restart();
 	green_grass_albedo = LoadTexture(ASSETS "/Grass_A_BaseColor.png");
 	green_grass_normal_map = LoadTexture(ASSETS "/Grass_A_Normal.png");
+	GenTextureMipmaps(&green_grass_albedo), GenTextureMipmaps(&green_grass_normal_map);
+	SetTextureFilter(green_grass_albedo, TEXTURE_FILTER_TRILINEAR);
+	SetTextureFilter(green_grass_normal_map, TEXTURE_FILTER_TRILINEAR);
 }
 
 void t_teardown() {
@@ -160,12 +163,12 @@ static void generate_chunk(float x, float z) {
 	mesh->indices = MemAlloc(3 * sizeof(uint16_t) * mesh->triangleCount);
 	mesh->vertices = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
 	mesh->normals = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
-	mesh->tangents = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
+	// mesh->tangents = MemAlloc(4 * sizeof(float) * mesh->vertexCount);
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
-	Vector3 *vertices = (Vector3*)mesh->vertices, *norms = (Vector3*)mesh->normals,
-		*tangents = (Vector3*)mesh->tangents;
+	Vector4* tangents = (Vector4*)mesh->tangents;
+	Vector3 *vertices = (Vector3*)mesh->vertices, *norms = (Vector3*)mesh->normals;
 	Vector2* texcoords = (Vector2*)mesh->texcoords;
 	Color* colors = (Color*)mesh->colors;
 
@@ -176,7 +179,10 @@ static void generate_chunk(float x, float z) {
 			vertices[v] = XYZ(x01 * SIDE, t_height(c_x(c, x), c_z(c, z)), z01 * SIDE);
 			texcoords[v] = XY(txbruh(c->x, x01), txbruh(c->z, z01));
 			norms[v] = t_norm(c_x(c, x), c_z(c, z)), colors[v] = WHITE;
-			tangents[v] = Vector3CrossProduct(norms[v], UP);
+
+			/* Vector3 tg = Vector3CrossProduct(norms[v], Vector3CrossProduct(XYZ(0, 0, 1), norms[v])); */
+			/* tangents[v].x = tg.x, tangents[v].y = tg.y, tangents[v].z = tg.z; */
+
 			v += 1;
 		}
 
