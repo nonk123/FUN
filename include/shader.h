@@ -15,7 +15,6 @@ extern Shader shaders[SHT_COUNT];
 
 typedef enum {
 	SHV_AMBIENT,
-	SHV_LIGHT_COUNT,
 } ShaderValue;
 
 void sh_init(), sh_teardown();

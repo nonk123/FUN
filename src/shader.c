@@ -1,11 +1,13 @@
+#include <stdio.h>
+
 #include <raylib.h>
 
+#include "light.h"
 #include "log.h"
 #include "shader.h"
 
 static const char* VARS[] = {
 	[SHV_AMBIENT] = "ambient",
-	[SHV_LIGHT_COUNT] = "light_count",
 };
 
 Shader shaders[SHT_COUNT] = {0}; // extern in `skydome.c`
@@ -13,7 +15,7 @@ Shader shaders[SHT_COUNT] = {0}; // extern in `skydome.c`
 // clang-format off
 static const char *leet_vsh =
 #include "shaders/leet.vsh"
-	, *leet_fsh =
+	, *leet_fsh_fmt =
 #include "shaders/leet.fsh"
 	, *skydome_vsh =
 #include "shaders/skydome.vsh"
@@ -31,6 +33,9 @@ Material* make_leet_materials() {
 }
 
 void sh_init() {
+	char leet_fsh[1024 * 12] = {0};
+	snprintf(leet_fsh, sizeof(leet_fsh), leet_fsh_fmt, MAX_LIGHTS);
+
 	// clang-format off
 	const char* sources[SHT_COUNT][2] = {
 		[SHT_LEET] = {leet_vsh, leet_fsh},
@@ -55,9 +60,6 @@ void sh_init() {
 		shaders[i].locs[SHADER_LOC_MAP_ALBEDO] = GetShaderLocation(shaders[i], "albedo");
 		shaders[i].locs[SHADER_LOC_MAP_NORMAL] = GetShaderLocation(shaders[i], "normal_map");
 	}
-
-	const int zero = 0;
-	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &zero, SHADER_UNIFORM_INT);
 }
 
 void sh_teardown() {

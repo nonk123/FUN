@@ -1,8 +1,8 @@
 #version 330
 
-#define MAX_LIGHTS (128)
-#define LIGHT_DIRECTIONAL (0)
-#define LIGHT_POINT (1)
+#define MAX_LIGHTS (%d)
+#define LIGHT_DIRECTIONAL (1)
+#define LIGHT_POINT (2)
 
 in vec3 f_pos;
 in vec2 f_uv;
@@ -13,7 +13,6 @@ in mat3 f_tbn;
 uniform sampler2D albedo, normal_map;
 uniform vec4 ambient;
 
-uniform int light_count;
 uniform struct {
 	int type;
 	vec3 pos, aux;
@@ -30,22 +29,20 @@ void main() {
 	normal = normalize(normal * f_tbn);
 
 	vec4 light_color = ambient;
-	for (int i = 0; i < light_count; i++) {
+	for (int i = 0; i < MAX_LIGHTS; i++) {
 		float factor = 1.0;
-
-	        // WARNING for my future self:
-		//   moving `light_dist` into a separate variable next to `factor`
-		//   in order to deduplicate the `dot(normal, light_dir)` part,
-	        //   it FUCKING BREAKS EVERYTHING!!! the scene turns black!!!
+		vec3 light_dist = vec3(0.0);
 
 		if (lights[i].type == LIGHT_DIRECTIONAL) {
-			factor *= dot(normal, -lights[i].aux);
+			light_dist = -lights[i].aux;
 		} else if (lights[i].type == LIGHT_POINT) {
-			vec3 light_dist = lights[i].pos - f_pos;
+			light_dist = lights[i].pos - f_pos;
 			factor *= clamp(lights[i].aux.x / length(light_dist), 0.0, 1.0);
-			factor *= dot(normal, normalize(light_dist));
+		} else {
+			continue;
 		}
 
+		factor *= dot(normal, normalize(light_dist));
 		light_color += lights[i].color * max(0.0, factor);
 	}
 

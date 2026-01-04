@@ -5,6 +5,7 @@
 #define MAX_LIGHTS (128)
 
 typedef enum {
+	LIGHT_NONE,
 	LIGHT_DIRECTIONAL,
 	LIGHT_POINT,
 } LightType;

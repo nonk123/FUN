@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "vecmath.h"
 
-static Light lights[128] = {0};
+static Light lights[MAX_LIGHTS] = {0};
 static int light_count = 0;
 
 static void check_light_count() {
@@ -24,7 +24,6 @@ static void light_set(int idx, const char* field, const void* value, int type) {
 
 void light_end() {
 	check_light_count();
-	sh_set(SHT_LEET, SHV_LIGHT_COUNT, &light_count, SHADER_UNIFORM_INT);
 
 	for (int i = 0; i < MAX_LIGHTS; i++) {
 		light_set(i, "type", &lights[i].type, SHADER_UNIFORM_INT);
