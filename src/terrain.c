@@ -163,7 +163,7 @@ static void generate_chunk(float x, float z) {
 	mesh->indices = MemAlloc(3 * sizeof(uint16_t) * mesh->triangleCount);
 	mesh->vertices = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
 	mesh->normals = MemAlloc(3 * sizeof(float) * mesh->vertexCount);
-	// mesh->tangents = MemAlloc(4 * sizeof(float) * mesh->vertexCount);
+	mesh->tangents = MemAlloc(4 * sizeof(float) * mesh->vertexCount);
 	mesh->texcoords = MemAlloc(2 * sizeof(float) * mesh->vertexCount);
 	mesh->colors = MemAlloc(4 * mesh->vertexCount);
 
@@ -180,8 +180,8 @@ static void generate_chunk(float x, float z) {
 			texcoords[v] = XY(txbruh(c->x, x01), txbruh(c->z, z01));
 			norms[v] = t_norm(c_x(c, x), c_z(c, z)), colors[v] = WHITE;
 
-			/* Vector3 tg = Vector3CrossProduct(norms[v], Vector3CrossProduct(XYZ(0, 0, 1), norms[v])); */
-			/* tangents[v].x = tg.x, tangents[v].y = tg.y, tangents[v].z = tg.z; */
+			Vector3 tg = Vector3CrossProduct(norms[v], Vector3CrossProduct(XYZ(0, 0, 1), norms[v]));
+			tangents[v].x = tg.x, tangents[v].y = tg.y, tangents[v].z = tg.z;
 
 			v += 1;
 		}

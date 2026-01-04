@@ -25,10 +25,9 @@ out vec4 final_color;
 void main() {
 	vec4 surface_color = f_color * texture(albedo, f_uv);
 
-	// vec3 normal = texture(normal_map, f_uv).rgb;
-	// normal = normalize(normal * 2.0 - 1.0);
-	// normal = normalize(normal * f_tbn);
-        vec3 normal = f_norm;
+	vec3 normal = texture(normal_map, f_uv).rgb;
+	normal = normalize(normal * 2.0 - 1.0);
+	normal = normalize(normal * f_tbn);
 
 	vec4 light_color = ambient;
 	for (int i = 0; i < light_count; i++) {
